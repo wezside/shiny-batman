@@ -23,6 +23,8 @@ namespace wezside
             static unsigned int frameCount;
             static int windowHandle;
             static GlutApp *m_self;
+            GlutApp(const GlutApp&);
+            GlutApp& operator=(GlutApp&);
 
         public:
 

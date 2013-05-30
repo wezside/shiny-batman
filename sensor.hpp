@@ -10,14 +10,14 @@ namespace wezside
     private:
     	openni::Status rc;
     	openni::Device device;
-    	openni::VideoStream vs;
+        openni::VideoStream depth, color;
     	const char* deviceURI;
 
 	public:    	
 		Sensor() : deviceURI(openni::ANY_DEVICE){};
 		~Sensor();
 
-		void init(int argc, char** argv);
+		int init(int argc, char** argv);
     };
 };
 
