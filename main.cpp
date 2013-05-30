@@ -15,10 +15,14 @@ int main(int argc, char **argv)
 {
     // Set up new 3D Sensor
     Sensor sensor;
-    sensor.init(argc, argv);
+    int rc = sensor.init(argc, argv);
+    /*if (rc != openni::STATUS_OK)
+    {
+        return EXIT_FAILURE;
+    }*/
 
     // Set up new GL Object - TODO: Needs to be abstract class
-    GLSensorViewer glo;
+    GLSensorViewer glo("Viewer", sensor.device, sensor.depth, sensor.color);
     // glShape.loadShader("", GLVertexShape::VERTEX);
     // glShape.loadShader("", GLVertexShape::FRAGMENT);
 
@@ -34,12 +38,13 @@ int main(int argc, char **argv)
 
     // Set up our Glut Application 
     GlutApp app;
-    app.glo = &glo;
+    app.glo = (GLObject*)&glo;
+    std::cout << app.glo->getName() << std::endl;
     app.init(argc, argv);
     // app.init(argc, argv, &glshape, &sensor);
      
     
     app.render();
 
-	exit( EXIT_SUCCESS );
+	return EXIT_SUCCESS;
 }

@@ -1,4 +1,3 @@
-
 #include "globject.hpp"
 
 using namespace wezside;
@@ -39,20 +38,6 @@ const GLchar* FragmentShader =
     "}\n"
 };
 
-GLObject::GLObject( std::string value )
-{
-    std::cout << value << std::endl;
-    ActiveIndexBuffer = 0;
-    // IndexBufferId = new GLuint[2];
-    
-}
-
-GLObject::~GLObject()
-{
-    destroyVBO();
-    destroyShaders();
-    // delete IndexBufferId;
-}
 
 string GLObject::getName()
 {
@@ -68,10 +53,10 @@ void GLObject::createVBO()
         { { 0.0f, 0.0f, 0.0f, 1.0f }, { 1.0f, 1.0f, 1.0f, 1.0f } }, // 0
 
         // Top
-        { { -0.2f, 0.8f, 0.0f, 1.0f }, { 0.0f, 1.0f, 0.0f, 1.0f } }, // 1
-        { { 0.2f, 0.8f, 0.0f, 1.0f }, { 0.0f, 0.0f, 1.0f, 1.0f } }, // 2
-        { { 0.0f, 0.8f, 0.0f, 1.0f }, { 0.0f, 1.0f, 1.0f, 1.0f } }, //3
-        { { 0.0f, 1.0f, 0.0f, 1.0f }, { 1.0f, 0.0f, 0.0f, 1.0f } }, // 4
+        { { -0.2f, 0.8f, 0.0f, 1.0f }, { 0.0f, 0.0f, 0.5f, 1.0f } }, // 1
+        { { 0.2f, 0.8f, 0.0f, 1.0f }, { 0.0f, 0.0f, 0.5f, 1.0f } }, // 2
+        { { 0.0f, 0.8f, 0.0f, 1.0f }, { 0.0f, 0.0f, 0.5f, 1.0f } }, //3
+        { { 0.0f, 1.0f, 0.0f, 1.0f }, { 0.0f, 0.0f, 0.5f, 1.0f } }, // 4
 
         // Bottom
         { { -0.2f, -0.8f, 0.0f, 1.0f }, { 0.0f, 0.0f, 1.0f, 1.0f } }, // 5

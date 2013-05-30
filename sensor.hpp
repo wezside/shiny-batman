@@ -8,16 +8,17 @@ namespace wezside
     class Sensor
     {
     private:
+        const char* deviceURI;
+
+    public:     
+        Sensor() : deviceURI(openni::ANY_DEVICE){};
+        ~Sensor();
+
+        int init(int argc, char** argv);
+        
     	openni::Status rc;
     	openni::Device device;
         openni::VideoStream depth, color;
-    	const char* deviceURI;
-
-	public:    	
-		Sensor() : deviceURI(openni::ANY_DEVICE){};
-		~Sensor();
-
-		int init(int argc, char** argv);
     };
 };
 
