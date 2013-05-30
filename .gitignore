@@ -1,0 +1,16 @@
+*.cpp~
+*.exe
+*.layout
+*.depend
+*.so
+*.o
+*.dll
+*.a
+.cproject
+.project
+cachegrind.*
+ValgrindOut.xml
+bin/
+obj/
+Debug/
+Release/
