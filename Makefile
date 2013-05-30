@@ -2,12 +2,13 @@
 
 CC = g++
 CFLAGS  = -g -Wall -ggdb 
-LDLIBS=-lGLEW -lglut -lGL -lGLU
+CPPFLAGS = -I/home/wezside/Downloads/OpenNI-2.1.0/Include/
+LDLIBS=-L./ -Wl,-rpath,./ -lGLEW -lglut -lGL -lGLU -lOpenNI2
 
 default: app
 
-app: glutapp.o globject.o sensor3d.o main.o 
-	$(CC) $(LDLIBS) $(CFLAGS) -o glutapp.o globject.o sensor3d.o main.o 
+app: glutapp.o globject.o sensor.o main.o 
+	$(CC) $(LDLIBS) $(CPPFLAGS) $(CFLAGS) -o app glutapp.o globject.o sensor.o main.o 
 
 clean: 
 	$(RM) count *.o *~
