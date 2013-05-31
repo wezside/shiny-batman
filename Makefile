@@ -1,4 +1,8 @@
+#
 # Makefile for Glut App Wrapper class
+# Requires NI shared lib file in same folder otherwise update the '-rpath' to 
+# point to the location of the installed lib
+#
 
 CC = g++
 CFLAGS  = -g -Wall -ggdb 
@@ -7,7 +11,7 @@ LDLIBS=-L./ -Wl,-rpath,./ -lGLEW -lglut -lGL -lGLU -lOpenNI2
 
 default: app
 
-app: glutapp.o globject.o sensor.o main.o 
+app: glutapp.o globject.o sensor.o glsensorviewer.o main.o 
 	$(CC) $(LDLIBS) $(CPPFLAGS) $(CFLAGS) -o app glutapp.o globject.o sensor.o main.o 
 
 clean: 
