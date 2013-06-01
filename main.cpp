@@ -23,28 +23,15 @@ int main(int argc, char **argv)
 
     // Set up new GL Object - TODO: Needs to be abstract class
     GLSensorViewer glo("Viewer", sensor.device, sensor.depth, sensor.color);
-    glo.init();
     // glShape.loadShader("", GLVertexShape::VERTEX);
     // glShape.loadShader("", GLVertexShape::FRAGMENT);
-
-    /*  
-    SampleViewer sampleViewer("Simple Viewer", device, depth, color);
-    rc = sampleViewer.init(argc, argv);
-    if (rc != openni::STATUS_OK)
-    {
-        openni::OpenNI::shutdown();
-        return 3;
-    }
-    */
+    glo.init();
 
     // Set up our Glut Application 
     GlutApp app;
     app.glo = (GLObject*)&glo;
     std::cout << app.glo->getName() << std::endl;
-    app.init(argc, argv);
-    // app.init(argc, argv, &glshape, &sensor);
-     
-    
+    app.init(argc, argv); 
     app.render();
 
 	return EXIT_SUCCESS;

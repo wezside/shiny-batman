@@ -205,24 +205,50 @@ void GLObject::destroyVBO()
 	}
 }
 
-void GLObject::createShaders()
+void GLObject::loadShader()
 {
-    std::cout << "GLObject::createShaders()" << std::endl;
+    printf("GLObject::loadShader()");
+    createShader(VertexShader, GL_VERTEX_SHADER);
+    createShader(FragmentShader, GL_FRAGMENT_SHADER);
+}
+
+void GLObject::loadShader(const char* fname, GLuint shader)
+{
+    printf("GLObject::loadShader(const char*, GLuint)");
+
+    // Load file 
+    std::fstream fShader(fname, std::ios::in);
+    std::string strShader;
+     
+    if (fShader.is_open())
+    {
+        std::stringstream buffer;
+        buffer << fShader.rdbuf();
+        strShader = buffer.str();
+    }
+    createShader(strShader.c_str(), shader);
+}
+
+void GLObject::createShader(const GLchar* shaderSrc, GLuint shader)
+{
+    GLuint shaderID;
 	GLenum ErrorCheckValue = glGetError();
+    if (ProgramId == 0) ProgramId = glCreateProgram();
+    switch(shader)
+    {
+        case GL_VERTEX_SHADER: 
+            shaderID = VertexShaderId = glCreateShader(GL_VERTEX_SHADER);
+            break;
 
-	VertexShaderId = glCreateShader( GL_VERTEX_SHADER );
-	glShaderSource( VertexShaderId, 1, &VertexShader, NULL );
-	glCompileShader( VertexShaderId );
-
-	FragmentShaderId = glCreateShader( GL_FRAGMENT_SHADER );
-	glShaderSource( FragmentShaderId, 1, &FragmentShader, NULL );
-	glCompileShader( FragmentShaderId);
-
-	ProgramId = glCreateProgram();
-    glAttachShader( ProgramId, VertexShaderId );
-    glAttachShader( ProgramId, FragmentShaderId );
-	glLinkProgram( ProgramId );
-	glUseProgram( ProgramId );
+        case GL_FRAGMENT_SHADER: 
+            shaderID = FragmentShaderId = glCreateShader(GL_FRAGMENT_SHADER);
+            break;
+    }
+    glShaderSource(shaderID, 1, &shaderSrc, NULL);
+    glCompileShader(shaderID);
+    glAttachShader(ProgramId, shaderID);
+	glLinkProgram(ProgramId);
+    glUseProgram(ProgramId);
 
 	ErrorCheckValue = glGetError();
 	if (ErrorCheckValue != GL_NO_ERROR)
@@ -232,7 +258,6 @@ void GLObject::createShaders()
 			"ERROR: Could not create the shaders: %s \n",
 			gluErrorString(ErrorCheckValue)
 		);
-
 		exit(-1);
 	}
 }

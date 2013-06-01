@@ -77,7 +77,7 @@ void GlutApp::init( int argc, char** argv )
     initGLStates();
 
     glo->createVBO();
-    glo->createShaders();
+    glo->loadShader();
 
     // Set intitial background colour
 	glClearColor( 0.0f, 0.0f, 0.0f, 0.0f );

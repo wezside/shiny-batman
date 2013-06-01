@@ -48,8 +48,8 @@ namespace wezside
                             {};
             int init(void);
             void display();
-            void simpleRead(openni::VideoFrameRef& frame);
-            void drawColorFrame(openni::VideoFrameRef& frame);
+            void simpleRead(openni::VideoFrameRef&);
+            void drawColorFrame(openni::VideoFrameRef&);
             
             DisplayModes m_eViewState;
             openni::RGB888Pixel* m_pTexMap;            
