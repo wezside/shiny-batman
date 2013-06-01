@@ -86,24 +86,24 @@ void wezside::GLSensorViewer::display()
  * Grab the pixel values from the color frame buffer and add it to the 
  * texture buffer. 
  */
-void wezide::GLSensorViewer::drawColorFrame(openni:VideoFrameRef& frame)
+void wezside::GLSensorViewer::drawColorFrame(openni::VideoFrameRef& frame)
 {
 	memset(m_pTexMap, 0, m_nTexMapX*m_nTexMapY*sizeof(openni::RGB888Pixel));
 
 	// check if we need to draw image frame to texture
 	if ((m_eViewState == DISPLAY_MODE_OVERLAY ||
-		m_eViewState == DISPLAY_MODE_IMAGE) && m_colorFrame.isValid())
+		m_eViewState == DISPLAY_MODE_IMAGE) && frame.isValid())
 	{
-		const openni::RGB888Pixel* pImageRow = (const openni::RGB888Pixel*)m_colorFrame.getData();
-		openni::RGB888Pixel* pTexRow = m_pTexMap + m_colorFrame.getCropOriginY() * m_nTexMapX;
-		int rowSize = m_colorFrame.getStrideInBytes() / sizeof(openni::RGB888Pixel);
+		const openni::RGB888Pixel* pImageRow = (const openni::RGB888Pixel*)frame.getData();
+		openni::RGB888Pixel* pTexRow = m_pTexMap + frame.getCropOriginY() * m_nTexMapX;
+		int rowSize = frame.getStrideInBytes() / sizeof(openni::RGB888Pixel);
 
-		for (int y = 0; y < m_colorFrame.getHeight(); ++y)
+		for (int y = 0; y < frame.getHeight(); ++y)
 		{
 			const openni::RGB888Pixel* pImage = pImageRow;
-			openni::RGB888Pixel* pTex = pTexRow + m_colorFrame.getCropOriginX();
+			openni::RGB888Pixel* pTex = pTexRow + frame.getCropOriginX();
 
-			for (int x = 0; x < m_colorFrame.getWidth(); ++x, ++pImage, ++pTex)
+			for (int x = 0; x < frame.getWidth(); ++x, ++pImage, ++pTex)
 			{
 				*pTex = *pImage;
 			}
@@ -112,6 +112,9 @@ void wezide::GLSensorViewer::drawColorFrame(openni:VideoFrameRef& frame)
 			pTexRow += m_nTexMapX;
 		}
 	}	
+
+	// Set up texture
+	
 }
 
 /** 

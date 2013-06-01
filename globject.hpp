@@ -41,6 +41,7 @@ namespace wezside
             virtual void destroyVBO();
             virtual void createShaders(void);
             virtual void destroyShaders(void);
+            virtual void onKey(unsigned char key, int x, int y);
 
             virtual GLuint getIndexBufferId(void);
             virtual GLuint getActiveIndexBuffer(void);

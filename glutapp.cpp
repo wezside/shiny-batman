@@ -137,14 +137,9 @@ void GlutApp::render(void)
 }
 void GlutApp::onKey(unsigned char key, int x, int y)
 {
+	if (glo != NULL) glo->onKey(key, x, y);
 	switch ( key )
 	{
-		case 'T':
-		case 't':
-		{
-			glo->setActiveIndexBuffer(glo->getActiveIndexBuffer() == 1 ? 0 : 1);
-			break;
-		}
 		case 'W':
 		case 'w': glPolygonMode(GL_FRONT_AND_BACK, GL_LINE); break;
 		case 'S':

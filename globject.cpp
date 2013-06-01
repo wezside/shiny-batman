@@ -264,18 +264,30 @@ void GLObject::destroyShaders()
 		exit(-1);
 	}
 }
-
-GLuint GLObject::getIndexBufferId( void )
+void GLObject::onKey(unsigned char key, int x, int y)
+{
+    switch ( key )
+    {
+        case 'T':
+        case 't':
+        {
+            setActiveIndexBuffer(getActiveIndexBuffer() == 1 ? 0 : 1);
+            break;
+        }
+        default: break;
+    }
+}
+GLuint GLObject::getIndexBufferId(void)
 {
 	// return IndexBufferId[ ActiveIndexBuffer ];
 }
 
-GLuint GLObject::getActiveIndexBuffer( void )
+GLuint GLObject::getActiveIndexBuffer(void)
 {
 	return ActiveIndexBuffer;
 }
 
-void GLObject::setActiveIndexBuffer( GLuint bufferIndex )
+void GLObject::setActiveIndexBuffer(GLuint bufferIndex)
 {
     ActiveIndexBuffer = bufferIndex;
     // TODO: Find a fix for this - indices are destroyed once data is uploaded to GPU
