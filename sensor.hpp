@@ -2,6 +2,7 @@
 #define SENSOR3D_H
 
 #include <OpenNI.h>
+#include <string.h>
 
 namespace wezside 
 {
@@ -11,7 +12,8 @@ namespace wezside
         const char* deviceURI;
 
     public:     
-        Sensor() : deviceURI(openni::ANY_DEVICE){};
+        Sensor() : deviceURI(openni::ANY_DEVICE) {};
+        Sensor(const char* value) : deviceURI(value) {};
         ~Sensor();
 
         int init(int argc, char** argv);

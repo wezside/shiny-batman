@@ -47,6 +47,8 @@ namespace wezside
                                                           m_pTexMap(NULL)
                             {};
             int init(void);
+            void display();
+            void simpleRead( openni::VideoFrameRef& frame );
             
             DisplayModes m_eViewState;
             openni::RGB888Pixel* m_pTexMap;            

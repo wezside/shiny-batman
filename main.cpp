@@ -16,13 +16,14 @@ int main(int argc, char **argv)
     // Set up new 3D Sensor
     Sensor sensor;
     int rc = sensor.init(argc, argv);
-    /*if (rc != openni::STATUS_OK)
+    if (rc != openni::STATUS_OK)
     {
         return EXIT_FAILURE;
-    }*/
+    }
 
     // Set up new GL Object - TODO: Needs to be abstract class
     GLSensorViewer glo("Viewer", sensor.device, sensor.depth, sensor.color);
+    glo.init();
     // glShape.loadShader("", GLVertexShape::VERTEX);
     // glShape.loadShader("", GLVertexShape::FRAGMENT);
 

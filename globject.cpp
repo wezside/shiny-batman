@@ -46,7 +46,7 @@ string GLObject::getName()
 
 void GLObject::createVBO()
 {
-    cout << "GLVertextShape::createVBO" << endl;
+    cout << "GLObject::createVBO" << endl;
 
     Vertex Vertices[] =
     {
@@ -177,7 +177,7 @@ void GLObject::createVBO()
 
 void GLObject::destroyVBO()
 {
-    cout << "GLVertextShape::destroyVBO" << endl;
+    cout << "GLObject::destroyVBO" << endl;
 	GLenum ErrorCheckValue = glGetError();
 
 	glDisableVertexAttribArray(1);
@@ -207,6 +207,7 @@ void GLObject::destroyVBO()
 
 void GLObject::createShaders()
 {
+    std::cout << "GLObject::createShaders()" << std::endl;
 	GLenum ErrorCheckValue = glGetError();
 
 	VertexShaderId = glCreateShader( GL_VERTEX_SHADER );
@@ -238,7 +239,7 @@ void GLObject::createShaders()
 
 void GLObject::destroyShaders()
 {
-    cout << "GLVertextShape::destroyShaders" << endl;
+    cout << "GLObject::destroyShaders" << endl;
 	GLenum ErrorCheckValue = glGetError();
 
 	glUseProgram(0);

@@ -1,9 +1,11 @@
 #include "sensor.hpp"
 
+
 wezside::Sensor::~Sensor() 
 {
 	// Do we need to shutdown NI?
 	// openni::OpenNI::shutdown();
+	openni::OpenNI::shutdown();
 }
 
 int wezside::Sensor::init(int argc, char** argv)

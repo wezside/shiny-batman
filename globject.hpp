@@ -25,9 +25,7 @@ namespace wezside
                 BufferId,
                 IndexBufferId[2],
             	ActiveIndexBuffer,
-                buffer1,buffer2;     
-
-            
+                buffer1,buffer2;                
 
         public:
             GLObject(std::string value = "default") : ActiveIndexBuffer(0), name(value) {}
@@ -37,16 +35,16 @@ namespace wezside
                 destroyShaders();
             }
 
-            std::string getName();
-            void display();
-            void createVBO();
-            void destroyVBO();
-            void createShaders(void);
-            void destroyShaders(void);
+            virtual std::string getName();
+            virtual void display(){};
+            virtual void createVBO();
+            virtual void destroyVBO();
+            virtual void createShaders(void);
+            virtual void destroyShaders(void);
 
-            GLuint getIndexBufferId(void);
-            GLuint getActiveIndexBuffer(void);
-            void setActiveIndexBuffer(GLuint);
+            virtual GLuint getIndexBufferId(void);
+            virtual GLuint getActiveIndexBuffer(void);
+            virtual void setActiveIndexBuffer(GLuint);
     };
 };
 #endif // GLOBJECT_H

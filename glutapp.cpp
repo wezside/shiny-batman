@@ -161,6 +161,9 @@ void GlutApp::display(void)
     ++frameCount;
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+	// Call GLObj display here
+	glo->display();
+
     // Draw stuff here
 	if (glo->getActiveIndexBuffer() == 0)
 	{
