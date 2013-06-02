@@ -11,8 +11,8 @@ LDLIBS=-L./ -Wl,-rpath,./ -lGLEW -lglut -lGL -lGLU -lOpenNI2
 
 default: app
 
-app: glutapp.o globject.o sensor.o glsensorviewer.o main.o 
-	$(CC) $(LDLIBS) $(CPPFLAGS) $(CFLAGS) -o app glutapp.o globject.o sensor.o glsensorviewer.o main.o 
+app: glutapp.o globject.o sensor.o glsensorviewer.o glutils.o main.o 
+	$(CC) $(LDLIBS) $(CPPFLAGS) $(CFLAGS) -o app glutapp.o globject.o sensor.o glsensorviewer.o glutils.o main.o 
 
 clean: 
 	$(RM) count *.o *~

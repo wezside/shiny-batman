@@ -68,7 +68,6 @@ namespace wezside
                 destroyVBO();
                 destroyShaders();
             }
-
             virtual void createShader(const GLchar*, GLenum);
             virtual std::string getName();
             virtual void display(){};

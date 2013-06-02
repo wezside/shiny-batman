@@ -120,9 +120,14 @@ void wezside::GLSensorViewer::display()
 	// Read depth frame
 	if (m_depthFrame.isValid()) simpleRead( m_depthFrame);
 
-	// Draw
-	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+	// Draw OpenGL
+	glUseProgram(ProgramId);
+	glBindVertexArray(VaoId);
 
+	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+	
+	glBindVertexArray(0);
+	glUseProgram(0);
 }
 
 /**

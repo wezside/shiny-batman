@@ -3,22 +3,18 @@
 
 wezside::Sensor::~Sensor() 
 {
-	// Do we need to shutdown NI?
-	// openni::OpenNI::shutdown();
 	openni::OpenNI::shutdown();
 }
 
 int wezside::Sensor::init(int argc, char** argv)
 {
 	openni::Status rc = openni::STATUS_OK;
-
 	if (argc > 1)
 	{
 		deviceURI = argv[1];
 	}
 
 	rc = openni::OpenNI::initialize();
-
 	printf("After initialization:\n%s\n", openni::OpenNI::getExtendedError());
 
 	rc = device.open(deviceURI);
@@ -66,13 +62,4 @@ int wezside::Sensor::init(int argc, char** argv)
 		return 2;
 	}
 	return rc;
-/*	SampleViewer sampleViewer("Simple Viewer", device, depth, color);
-
-	rc = sampleViewer.init(argc, argv);
-	if (rc != openni::STATUS_OK)
-	{
-		openni::OpenNI::shutdown();
-		return 3;
-	}
-	sampleViewer.run();*/
 }
