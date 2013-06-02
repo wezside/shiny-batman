@@ -61,7 +61,13 @@ int wezside::GLSensorViewer::init()
 void wezside::GLSensorViewer::createVBO()
 {
 	std::cout << "GLSensorViewer::createVBO" << std::endl;
- 	Vertex Vertices[] =
+
+	glUtil.translateMatrix(&viewMatrix, 0, 0, -2);
+	
+    modelMatrixUniformLocation = glGetUniformLocation(programID, "modelMatrix");
+    viewMatrixUniformLocation = glGetUniformLocation(programID, "viewMatrix");
+    projectionMatrixUniformLocation = glGetUniformLocation(programID, "projectionMatrix");	
+ 	Vertex vertices[] =
     {
         {{ -0.8f,  0.8f, 0.0f, 1.0f }, { 1.0f, 0.0f, 0.0f, 1.0f }},
         {{  0.8f,  0.8f, 0.0f, 1.0f }, { 0.0f, 1.0f, 0.0f, 1.0f }},
@@ -69,32 +75,21 @@ void wezside::GLSensorViewer::createVBO()
         {{  0.8f, -0.8f, 0.0f, 1.0f }, { 0.0f, 0.0f, 1.0f, 1.0f }}
     };
  
-    GLenum ErrorCheckValue = glGetError();
-    const size_t VertexSize = sizeof(Vertices[0]);
-    const size_t RgbOffset = sizeof(Vertices[0].XYZW);    
+    const size_t vertexSize = sizeof(vertices[0]);
+    const size_t rgbOffset = sizeof(vertices[0].XYZW);    
      
-    glGenVertexArrays(1, &VaoId);
-    glBindVertexArray(VaoId);
+    glGenVertexArrays(1, &vaoID);
+    glBindVertexArray(vaoID);
     
-    glGenBuffers(1, &BufferId);
-    glBindBuffer(GL_ARRAY_BUFFER, BufferId);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(Vertices), Vertices, GL_STATIC_DRAW);
-    glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, VertexSize, 0);
-	glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, VertexSize, (GLvoid*) RgbOffset);
+    glGenBuffers(1, &bufferID);
+    glBindBuffer(GL_ARRAY_BUFFER, bufferID);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+    glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, vertexSize, 0);
+	glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, vertexSize, (GLvoid*) rgbOffset);
     glEnableVertexAttribArray(0);
     glEnableVertexAttribArray(1);
  
-    ErrorCheckValue = glGetError();
-    if (ErrorCheckValue != GL_NO_ERROR)
-    {
-        fprintf(
-            stderr,
-            "ERROR: Could not create a VBO: %s \n",
-            gluErrorString(ErrorCheckValue)
-        );
- 
-        exit(-1);
-    }
+ 	glUtil.exitOnGLError("ERROR: Could not create a VBO");
 }
 
 void wezside::GLSensorViewer::display()
@@ -121,11 +116,29 @@ void wezside::GLSensorViewer::display()
 	if (m_depthFrame.isValid()) simpleRead( m_depthFrame);
 
 	// Draw OpenGL
-	glUseProgram(ProgramId);
-	glBindVertexArray(VaoId);
+	angle += 1.0f;
+	angle = fmod(angle, 360.0);
+
+	modelMatrix = GLUtils::IDENTITY_MATRIX;
+	glUtil.rotateAboutY(&modelMatrix, glUtil.degreesToRadians(angle));
+	glUtil.rotateAboutX(&modelMatrix, glUtil.degreesToRadians(angle));
+
+	// Make the shader program active
+	glUseProgram(programID);
+	glUtil.exitOnGLError("ERROR: Could not use the shader program");	
+
+	// Update the shader Uniform variables
+	glUniformMatrix4fv(modelMatrixUniformLocation, 1, GL_FALSE, modelMatrix.m);
+	glUniformMatrix4fv(viewMatrixUniformLocation, 1, GL_FALSE, viewMatrix.m);
+	glUtil.exitOnGLError("ERROR: Could not set the shader uniforms");
+
+	glBindVertexArray(vaoID);
+	glUtil.exitOnGLError("ERROR: Could not bind the VAO for drawing purposes");
 
 	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-	
+	glUtil.exitOnGLError("ERROR: Could not draw");
+
+	// Cleanup
 	glBindVertexArray(0);
 	glUseProgram(0);
 }

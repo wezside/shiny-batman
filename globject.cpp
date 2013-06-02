@@ -11,7 +11,7 @@ string GLObject::getName()
 void GLObject::createVBO()
 {
     cout << "GLObject::createVBO" << endl;
-    Vertex Vertices[] =
+    Vertex vertices[] =
     {
         { { 0.0f, 0.0f, 0.0f, 1.0f }, { 1.0f, 1.0f, 1.0f, 1.0f } }, // 0
 
@@ -45,7 +45,7 @@ void GLObject::createVBO()
     // If you look at the drawing this does actually make sense as
     // each array element from Vertices marked by these indices will
     // make up a triangle
-    GLubyte Indices[] = 
+    GLubyte indices[] = 
     {
         // Top
         0, 1, 3,
@@ -72,7 +72,7 @@ void GLObject::createVBO()
         15, 16, 14
     };
 
-    GLubyte AlternateIndices[] = 
+    GLubyte alternateIndices[] = 
     {
         // Outer square border:
         3, 4, 16,
@@ -91,46 +91,40 @@ void GLObject::createVBO()
         0, 7, 11
     };
 
-    GLenum ErrorCheckValue = glGetError();
-    const size_t BufferSize = sizeof( Vertices );
-    const size_t VertexSize = sizeof( Vertices[0] );
-    const size_t RgbOffset = sizeof( Vertices[0].XYZW );
+    modelMatrixUniformLocation = glGetUniformLocation(programID, "ModelMatrix");
+    viewMatrixUniformLocation = glGetUniformLocation(programID, "ViewMatrix");
+    projectionMatrixUniformLocation = glGetUniformLocation(programID, "ProjectionMatrix");
+    glUtil.exitOnGLError("ERROR: Could not get shader uniform locations");
 
-	glGenVertexArrays( 1, &VaoId );
-	glBindVertexArray( VaoId );
+    const size_t bufferSize = sizeof( vertices );
+    const size_t vertexSize = sizeof( vertices[0] );
+    const size_t rgbOffset = sizeof( vertices[0].XYZW );
 
-	glGenBuffers( 1, &BufferId );
-	glBindBuffer( GL_ARRAY_BUFFER, BufferId );
-	glBufferData( GL_ARRAY_BUFFER, BufferSize, Vertices, GL_STATIC_DRAW );
+	glGenVertexArrays( 1, &vaoID );
+	glBindVertexArray( vaoID );
+
+	glGenBuffers( 1, &bufferID );
+	glBindBuffer( GL_ARRAY_BUFFER, bufferID );
+	glBufferData( GL_ARRAY_BUFFER, bufferSize, vertices, GL_STATIC_DRAW );
 
     // Indicate how the vertice data is stored
-	glVertexAttribPointer( 0, 4, GL_FLOAT, GL_FALSE, VertexSize, 0 );
+	glVertexAttribPointer( 0, 4, GL_FLOAT, GL_FALSE, vertexSize, 0 );
 
 	// Indicate where the colour data is stored
-	glVertexAttribPointer( 1, 4, GL_FLOAT, GL_FALSE, VertexSize, ( GLvoid* ) RgbOffset );
+	glVertexAttribPointer( 1, 4, GL_FLOAT, GL_FALSE, vertexSize, ( GLvoid* ) rgbOffset );
 
 	glEnableVertexAttribArray( 0 );
 	glEnableVertexAttribArray( 1 );
 
-    glGenBuffers( 2, IndexBufferId );
+    glGenBuffers( 2, indexBufferID );
     
-    glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, IndexBufferId[0]);    
-    glBufferData( GL_ELEMENT_ARRAY_BUFFER, sizeof( Indices ), Indices, GL_STATIC_DRAW );
+    glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, indexBufferID[0]);    
+    glBufferData( GL_ELEMENT_ARRAY_BUFFER, sizeof( indices ), indices, GL_STATIC_DRAW );
 
-    glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, IndexBufferId[1]);
-    glBufferData( GL_ELEMENT_ARRAY_BUFFER, sizeof( AlternateIndices ), AlternateIndices, GL_STATIC_DRAW );
+    glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, indexBufferID[1]);
+    glBufferData( GL_ELEMENT_ARRAY_BUFFER, sizeof( alternateIndices ), alternateIndices, GL_STATIC_DRAW );
 
-	ErrorCheckValue = glGetError();
-	if ( ErrorCheckValue != GL_NO_ERROR )
-	{
-		fprintf(
-			stderr,
-			"ERROR: Could not create a VBO: %s \n",
-			gluErrorString(ErrorCheckValue)
-		);
-
-		exit(-1);
-	}
+    glUtil.exitOnGLError("ERROR: Could not create a VBO");
 }
 
 void GLObject::destroyVBO()
@@ -142,31 +136,22 @@ void GLObject::destroyVBO()
 	glDisableVertexAttribArray(0);
 
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
-	glDeleteBuffers(1, &BufferId);
+	glDeleteBuffers(1, &bufferID);
 
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-    // glDeleteBuffers( 2, IndexBufferId );
+    // glDeleteBuffers( 2, IndexbufferID );
 
 	glBindVertexArray(0);
-	glDeleteVertexArrays(1, &VaoId);
+	glDeleteVertexArrays(1, &vaoID);
 
-	ErrorCheckValue = glGetError();
-	if (ErrorCheckValue != GL_NO_ERROR)
-	{
-		fprintf(
-			stderr,
-			"ERROR: Could not destroy the VBO: %s \n",
-			gluErrorString(ErrorCheckValue)
-		);
-		exit(-1);
-	}
+    glUtil.exitOnGLError("ERROR: Could not destroy the VBO");
 }
 
 void GLObject::loadShader()
 {
     std::cout << "GLObject::loadShader()" << std::endl;   
-    createShader(VertexShader, GL_VERTEX_SHADER);
-    createShader(FragmentShader, GL_FRAGMENT_SHADER);
+    createShader(vertexShader, GL_VERTEX_SHADER);
+    createShader(fragmentShader, GL_FRAGMENT_SHADER);
 }
 
 void GLObject::loadShader(const char* fname, GLenum shader)
@@ -192,48 +177,31 @@ void GLObject::createShader(const GLchar* shaderSrc, GLenum shader)
     GLenum ErrorCheckValue = glGetError();
     if (shader == GL_VERTEX_SHADER)
     {
-        VertexShaderId = glCreateShader(GL_VERTEX_SHADER);
-        glShaderSource(VertexShaderId, 1, &shaderSrc, NULL);
-        glCompileShader(VertexShaderId);
+        vertexShaderId = glCreateShader(GL_VERTEX_SHADER);
+        glShaderSource(vertexShaderId, 1, &shaderSrc, NULL);
+        glCompileShader(vertexShaderId);
     }
     if (shader == GL_FRAGMENT_SHADER)
     {
-        FragmentShaderId = glCreateShader(GL_FRAGMENT_SHADER);
-        glShaderSource(FragmentShaderId, 1, &shaderSrc, NULL);
-        glCompileShader(FragmentShaderId);
+        fragmentShaderId = glCreateShader(GL_FRAGMENT_SHADER);
+        glShaderSource(fragmentShaderId, 1, &shaderSrc, NULL);
+        glCompileShader(fragmentShaderId);
     }
-    ErrorCheckValue = glGetError();
-    if (ErrorCheckValue != GL_NO_ERROR)
-    {
-        fprintf(
-            stderr,
-            "ERROR: Could not create the shaders: %s \n",
-            gluErrorString(ErrorCheckValue)
-        );
-        exit(-1);
-    }
+    glUtil.exitOnGLError("ERROR: Could not create the shaders");
 }
 void GLObject::glslProgram()
 {
     GLint tmp;
     glGetIntegerv(GL_CURRENT_PROGRAM, &tmp);
-    std::cout << "GLObject::Current GLSLS Program " << ProgramId << std::endl;    
+    std::cout << "GLObject::Current GLSLS Program " << programID << std::endl;    
     GLenum ErrorCheckValue = glGetError();
-    ProgramId = glCreateProgram();
-    glAttachShader(ProgramId, VertexShaderId);  
-    glAttachShader(ProgramId, FragmentShaderId);    
-    glLinkProgram(ProgramId);
-    glUseProgram(ProgramId);
-    ErrorCheckValue = glGetError();
-    if (ErrorCheckValue != GL_NO_ERROR)
-    {
-        fprintf(
-            stderr,
-            "ERROR: Could not create the shaders: %s \n",
-            gluErrorString(ErrorCheckValue)
-        );
-        exit(-1);
-    }    
+    programID = glCreateProgram();
+    glAttachShader(programID, vertexShaderId);  
+    glAttachShader(programID, fragmentShaderId);    
+    glLinkProgram(programID);
+    glUseProgram(programID);
+
+    glUtil.exitOnGLError("ERROR: Could not create the GLSL program");
 }
 void GLObject::destroyShaders()
 {
@@ -242,25 +210,15 @@ void GLObject::destroyShaders()
 
 	glUseProgram(0);
 
-	glDetachShader(ProgramId, VertexShaderId);
-	glDetachShader(ProgramId, FragmentShaderId);
+	glDetachShader(programID, vertexShaderId);
+	glDetachShader(programID, fragmentShaderId);
 
-	glDeleteShader(FragmentShaderId);
-	glDeleteShader(VertexShaderId);
+	glDeleteShader(fragmentShaderId);
+	glDeleteShader(vertexShaderId);
 
-	glDeleteProgram(ProgramId);
+	glDeleteProgram(programID);
 
-	ErrorCheckValue = glGetError();
-	if (ErrorCheckValue != GL_NO_ERROR)
-	{
-		fprintf(
-			stderr,
-			"ERROR: Could not destroy the shaders: %s \n",
-			gluErrorString(ErrorCheckValue)
-		);
-
-		exit(-1);
-	}
+    glUtil.exitOnGLError("ERROR: Could not destroy the shaders");
 }
 void GLObject::onKey(unsigned char key, int x, int y)
 {
@@ -275,21 +233,31 @@ void GLObject::onKey(unsigned char key, int x, int y)
         default: break;
     }
 }
-GLuint GLObject::getIndexBufferId(void)
+void GLObject::resize(int w, int h)
 {
-	// return IndexBufferId[ ActiveIndexBuffer ];
+    projectionMatrix =
+        glUtil.createProjectionMatrix(
+            60,
+            (float)w / h,
+            1.0f,
+            100.0f
+        );
+
+    glUseProgram(programID);
+    glUniformMatrix4fv(projectionMatrixUniformLocation, 1, GL_FALSE, projectionMatrix.m);
+    glUseProgram(0);    
 }
 
 GLuint GLObject::getActiveIndexBuffer(void)
 {
-	return ActiveIndexBuffer;
+	return activeIndexBuffer;
 }
 
 void GLObject::setActiveIndexBuffer(GLuint bufferIndex)
 {
-    ActiveIndexBuffer = bufferIndex;
+    activeIndexBuffer = bufferIndex;
     // TODO: Find a fix for this - indices are destroyed once data is uploaded to GPU
-    IndexBufferId[0] = 2;
-    IndexBufferId[1] = 3;
-    glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, IndexBufferId[bufferIndex]);
+    indexBufferID[0] = 2;
+    indexBufferID[1] = 3;
+    glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, indexBufferID[bufferIndex]);
 }

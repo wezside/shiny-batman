@@ -32,7 +32,8 @@ namespace wezside
             int m_width;
             int m_height;            
             unsigned int m_nTexMapX;
-            unsigned int m_nTexMapY;            
+            unsigned int m_nTexMapY;         
+            float angle;
 
         public:
             GLSensorViewer(std::string value,
@@ -44,7 +45,8 @@ namespace wezside
                                                           m_colorStream(color), 
                                                           m_streams(NULL), 
                                                           m_eViewState(DEFAULT_DISPLAY_MODE), 
-                                                          m_pTexMap(NULL)
+                                                          m_pTexMap(NULL),
+                                                          angle(0)
                             {};
             int init(void);
             void display();

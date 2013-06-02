@@ -8,6 +8,7 @@
 #include <sstream>
 #include <GL/glew.h>
 #include <GL/freeglut.h>
+#include "glutils.hpp"
 
 namespace wezside
 {  
@@ -25,22 +26,33 @@ namespace wezside
             } Vertex;
             std::string name;
             GLuint
-                VertexShaderId,
-                FragmentShaderId,
-                ProgramId,
-                VaoId,
-                BufferId,
-                IndexBufferId[2],
-            	ActiveIndexBuffer;  
+                vertexShaderId,
+                fragmentShaderId,
+                programID,
+                vaoID,
+                bufferID,
+                indexBufferID[2],
+            	activeIndexBuffer,
+                projectionMatrixUniformLocation,
+                viewMatrixUniformLocation,
+                modelMatrixUniformLocation;
 
-            const GLchar* VertexShader;
-            const GLchar* FragmentShader;
+            GLUtils::Matrix modelMatrix,
+                            projectionMatrix,
+                            viewMatrix;
+
+            const GLchar* vertexShader;
+            const GLchar* fragmentShader;
+            GLUtils glUtil;
 
         public:
             GLObject(std::string value = "default") : 
-                ActiveIndexBuffer(0), 
+                activeIndexBuffer(0), 
                 name(value), 
-                VertexShader(
+                modelMatrix(GLUtils::IDENTITY_MATRIX),
+                projectionMatrix(GLUtils::IDENTITY_MATRIX),
+                viewMatrix(GLUtils::IDENTITY_MATRIX),
+                vertexShader(
                 "#version 330\n"\
 
                 "layout(location=0) in vec4 in_Position;\n"\
@@ -52,7 +64,7 @@ namespace wezside
                 "   gl_Position = in_Position;\n"\
                 "   ex_Color = in_Color;\n"\
                 "}\n"),
-                FragmentShader(
+                fragmentShader(
                 "#version 330\n"\
 
                 "in vec4 ex_Color;\n"\
@@ -77,9 +89,9 @@ namespace wezside
             virtual void loadShader(void);
             virtual void loadShader(const char*, GLenum);
             virtual void glslProgram();
+            virtual void resize(int, int);
             virtual void onKey(unsigned char, int, int);
 
-            virtual GLuint getIndexBufferId(void);
             virtual GLuint getActiveIndexBuffer(void);
             virtual void setActiveIndexBuffer(GLuint);
     };

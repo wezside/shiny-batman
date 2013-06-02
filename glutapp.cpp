@@ -77,7 +77,6 @@ void GlutApp::init( int argc, char** argv, const char* fVertex, const char* fFra
     initGLStates();
 
     // Create Vertex Buffer Objects
-    glo->createVBO();
     if (fVertex == NULL || fFragment == NULL) glo->loadShader();
     else
     {
@@ -85,6 +84,7 @@ void GlutApp::init( int argc, char** argv, const char* fVertex, const char* fFra
     	glo->loadShader(fFragment, GL_FRAGMENT_SHADER);	
     } 
     glo->glslProgram();
+    glo->createVBO();
     
     // Set intitial background colour
 	glClearColor( 0.0f, 0.0f, 0.0f, 0.0f );
@@ -92,7 +92,7 @@ void GlutApp::init( int argc, char** argv, const char* fVertex, const char* fFra
 
 void GlutApp::initGLStates()
 {
-    glShadeModel( GL_SMOOTH );
+    // glShadeModel( GL_SMOOTH );
 }
 
 void GlutApp::initWindow( int argc, char* argv[] )
@@ -156,6 +156,7 @@ void GlutApp::onKey(unsigned char key, int x, int y)
 }
 void GlutApp::resize(int w, int h)
 {
+	glo->resize(w, h);
 	glViewport(0, 0, w, h);
 }
 void GlutApp::display(void)
