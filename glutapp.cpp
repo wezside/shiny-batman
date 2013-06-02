@@ -41,7 +41,7 @@ void GlutApp::glutCleanup( void )
 	GlutApp::m_self->cleanup();
 }
 
-void GlutApp::init( int argc, char** argv )
+void GlutApp::init( int argc, char** argv, const char* fVertex, const char* fFragment )
 {
     GLenum glewInitResult;
     cout << "GlutApp::initialize()" << endl;
@@ -78,8 +78,14 @@ void GlutApp::init( int argc, char** argv )
 
     // Create Vertex Buffer Objects
     glo->createVBO();
-    glo->loadShader();
-
+    if (fVertex == NULL || fFragment == NULL) glo->loadShader();
+    else
+    {
+    	glo->loadShader(fVertex, GL_VERTEX_SHADER);	
+    	glo->loadShader(fFragment, GL_FRAGMENT_SHADER);	
+    } 
+    glo->glslProgram();
+    
     // Set intitial background colour
 	glClearColor( 0.0f, 0.0f, 0.0f, 0.0f );
 }

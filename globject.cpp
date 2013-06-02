@@ -3,34 +3,6 @@
 using namespace std;
 using namespace wezside;
 
-/*const GLchar* VertexShader =
-{
-    "#version 330\n"\
-
-    "layout(location=0) in vec4 in_Position;\n"\
-    "layout(location=1) in vec4 in_Color;\n"\
-    "out vec4 ex_Color;\n"\
-
-    "void main(void)\n"\
-    "{\n"\
-    "	gl_Position = in_Position;\n"\
-    "	ex_Color = in_Color;\n"\
-    "}\n"
-};
-
-const GLchar* FragmentShader =
-{
-    "#version 330\n"\
-
-    "in vec4 ex_Color;\n"\
-    "out vec4 out_Color;\n"\
-
-    "void main(void)\n"\
-    "{\n"\
-    "	out_Color = ex_Color;\n"\
-    "}\n"
-};*/
-
 string GLObject::getName()
 {
     return name;
@@ -193,7 +165,7 @@ void GLObject::destroyVBO()
 void GLObject::loadShader()
 {
     std::cout << "GLObject::loadShader()" << std::endl;   
-    GLenum ErrorCheckValue = glGetError();
+/*    GLenum ErrorCheckValue = glGetError();
 
     VertexShaderId = glCreateShader(GL_VERTEX_SHADER);
     glShaderSource(VertexShaderId, 1, &VertexShader, NULL);
@@ -217,12 +189,12 @@ void GLObject::loadShader()
             gluErrorString(ErrorCheckValue)
         );
         exit(-1);
-    }    
-    // createShader(VertexShader, GL_VERTEX_SHADER);
-    // createShader(FragmentShader, GL_FRAGMENT_SHADER);
+    }    */
+    createShader(VertexShader, GL_VERTEX_SHADER);
+    createShader(FragmentShader, GL_FRAGMENT_SHADER);
 }
 
-void GLObject::loadShader(const char* fname, GLuint shader)
+void GLObject::loadShader(const char* fname, GLenum shader)
 {
     std::cout << "GLObject::loadShader(const char*, GLuint)" << std::endl;
 
@@ -241,7 +213,7 @@ void GLObject::loadShader(const char* fname, GLuint shader)
 
 void GLObject::createShader(const GLchar* shaderSrc, GLenum shader)
 {
-    GLenum ErrorCheckValue = glGetError();
+/*    GLenum ErrorCheckValue = glGetError();
      
     VertexShaderId = glCreateShader(GL_VERTEX_SHADER);
     glShaderSource(VertexShaderId, 1, &shaderSrc, NULL);
@@ -266,31 +238,22 @@ void GLObject::createShader(const GLchar* shaderSrc, GLenum shader)
         );
 
         exit(-1);
-    }
+    }*/
 
- /*   std::cout << "GLObject::createShader(const GLchar*, GLenum)" << std::endl;
+    std::cout << "GLObject::createShader(const GLchar*, GLenum)" << std::endl;
     GLenum ErrorCheckValue = glGetError();
-    
-    switch(shader)
+    if (shader == GL_VERTEX_SHADER)
     {
-        case GL_VERTEX_SHADER: 
-            VertexShaderId = glCreateShader(GL_VERTEX_SHADER);
-            glShaderSource(VertexShaderId, 1, &VertexShader, NULL);
-            glCompileShader(VertexShaderId);
-        break;
-        case GL_FRAGMENT_SHADER: 
-            FragmentShaderId = glCreateShader(GL_FRAGMENT_SHADER);
-            glShaderSource(FragmentShaderId, 1, &FragmentShader, NULL);
-            glCompileShader(FragmentShaderId);
-        break;
+        VertexShaderId = glCreateShader(GL_VERTEX_SHADER);
+        glShaderSource(VertexShaderId, 1, &VertexShader, NULL);
+        glCompileShader(VertexShaderId);
     }
-
-    ProgramId = glCreateProgram();
-    glAttachShader(ProgramId, VertexShaderId);  
-    glAttachShader(ProgramId, FragmentShaderId);    
-    glLinkProgram(ProgramId);
-    glUseProgram(ProgramId);
- 
+    if (shader == GL_FRAGMENT_SHADER)
+    {
+        FragmentShaderId = glCreateShader(GL_FRAGMENT_SHADER);
+        glShaderSource(FragmentShaderId, 1, &FragmentShader, NULL);
+        glCompileShader(FragmentShaderId);
+    }
     ErrorCheckValue = glGetError();
     if (ErrorCheckValue != GL_NO_ERROR)
     {
@@ -301,9 +264,31 @@ void GLObject::createShader(const GLchar* shaderSrc, GLenum shader)
         );
  
         exit(-1);
-    }*/
+    }
 }
-
+void GLObject::glslProgram()
+{
+    GLint tmp;
+    glGetIntegerv(GL_CURRENT_PROGRAM, &tmp);
+    std::cout << "Current GLSLS Program " << ProgramId << std::endl;    
+    GLenum ErrorCheckValue = glGetError();
+    ProgramId = glCreateProgram();
+    glAttachShader(ProgramId, VertexShaderId);  
+    glAttachShader(ProgramId, FragmentShaderId);    
+    glLinkProgram(ProgramId);
+    glUseProgram(ProgramId);
+    ErrorCheckValue = glGetError();
+    if (ErrorCheckValue != GL_NO_ERROR)
+    {
+        fprintf(
+            stderr,
+            "ERROR: Could not create the shaders: %s \n",
+            gluErrorString(ErrorCheckValue)
+        );
+ 
+        exit(-1);
+    }    
+}
 void GLObject::destroyShaders()
 {
     cout << "GLObject::destroyShaders" << endl;

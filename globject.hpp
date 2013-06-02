@@ -40,9 +40,6 @@ namespace wezside
             GLObject(std::string value = "default") : 
                 ActiveIndexBuffer(0), 
                 name(value), 
-                ProgramId(0),
-                VertexShaderId(0),
-                FragmentShaderId(0),
                 VertexShader(
                 "#version 330\n"\
 
@@ -79,7 +76,8 @@ namespace wezside
             virtual void destroyVBO();
             virtual void destroyShaders(void);
             virtual void loadShader(void);
-            virtual void loadShader(const char*, GLuint);
+            virtual void loadShader(const char*, GLenum);
+            virtual void glslProgram();
             virtual void onKey(unsigned char, int, int);
 
             virtual GLuint getIndexBufferId(void);

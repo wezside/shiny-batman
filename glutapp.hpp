@@ -33,7 +33,7 @@ namespace wezside
 
             GLObject* glo;
 
-            void init(int argc, char** argv);
+            void init(int, char**, const char* = NULL, const char* = NULL);
             void initGLStates();
 
             void resize(int w, int h);
