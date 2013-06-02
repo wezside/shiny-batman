@@ -1,16 +1,9 @@
 #include "globject.hpp"
 
-using namespace wezside;
 using namespace std;
+using namespace wezside;
 
-typedef struct
-{
-    float XYZW[4];
-    float RGBA[4];
-} Vertex;
-
-
-const GLchar* VertexShader =
+/*const GLchar* VertexShader =
 {
     "#version 330\n"\
 
@@ -36,8 +29,7 @@ const GLchar* FragmentShader =
     "{\n"\
     "	out_Color = ex_Color;\n"\
     "}\n"
-};
-
+};*/
 
 string GLObject::getName()
 {
@@ -47,7 +39,6 @@ string GLObject::getName()
 void GLObject::createVBO()
 {
     cout << "GLObject::createVBO" << endl;
-
     Vertex Vertices[] =
     {
         { { 0.0f, 0.0f, 0.0f, 1.0f }, { 1.0f, 1.0f, 1.0f, 1.0f } }, // 0
@@ -157,11 +148,6 @@ void GLObject::createVBO()
     glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, IndexBufferId[1]);
     glBufferData( GL_ELEMENT_ARRAY_BUFFER, sizeof( AlternateIndices ), AlternateIndices, GL_STATIC_DRAW );
 
-    // Copy
-    // memcpy( IndexBufferId, IndexBufferId, sizeof(IndexBufferId));
-    // glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, IndexBufferId[0]);
-    // cout << IndexBufferId[0] << endl;
-
 	ErrorCheckValue = glGetError();
 	if ( ErrorCheckValue != GL_NO_ERROR )
 	{
@@ -200,21 +186,45 @@ void GLObject::destroyVBO()
 			"ERROR: Could not destroy the VBO: %s \n",
 			gluErrorString(ErrorCheckValue)
 		);
-
 		exit(-1);
 	}
 }
 
 void GLObject::loadShader()
 {
-    printf("GLObject::loadShader()");
-    createShader(VertexShader, GL_VERTEX_SHADER);
-    createShader(FragmentShader, GL_FRAGMENT_SHADER);
+    std::cout << "GLObject::loadShader()" << std::endl;   
+    GLenum ErrorCheckValue = glGetError();
+
+    VertexShaderId = glCreateShader(GL_VERTEX_SHADER);
+    glShaderSource(VertexShaderId, 1, &VertexShader, NULL);
+    glCompileShader(VertexShaderId);
+
+    FragmentShaderId = glCreateShader(GL_FRAGMENT_SHADER);
+    glShaderSource(FragmentShaderId, 1, &FragmentShader, NULL);
+    glCompileShader(FragmentShaderId);
+    ProgramId = glCreateProgram();
+        glAttachShader(ProgramId, VertexShaderId);
+        glAttachShader(ProgramId, FragmentShaderId);
+    glLinkProgram(ProgramId);
+    glUseProgram(ProgramId);
+
+    ErrorCheckValue = glGetError();
+    if (ErrorCheckValue != GL_NO_ERROR)
+    {
+        fprintf(
+            stderr,
+            "ERROR: Could not create the shaders: %s \n",
+            gluErrorString(ErrorCheckValue)
+        );
+        exit(-1);
+    }    
+    // createShader(VertexShader, GL_VERTEX_SHADER);
+    // createShader(FragmentShader, GL_FRAGMENT_SHADER);
 }
 
 void GLObject::loadShader(const char* fname, GLuint shader)
 {
-    printf("GLObject::loadShader(const char*, GLuint)");
+    std::cout << "GLObject::loadShader(const char*, GLuint)" << std::endl;
 
     // Load file 
     std::fstream fShader(fname, std::ios::in);
@@ -229,37 +239,69 @@ void GLObject::loadShader(const char* fname, GLuint shader)
     createShader(strShader.c_str(), shader);
 }
 
-void GLObject::createShader(const GLchar* shaderSrc, GLuint shader)
+void GLObject::createShader(const GLchar* shaderSrc, GLenum shader)
 {
-    GLuint shaderID;
-	GLenum ErrorCheckValue = glGetError();
-    if (ProgramId == 0) ProgramId = glCreateProgram();
+    GLenum ErrorCheckValue = glGetError();
+     
+    VertexShaderId = glCreateShader(GL_VERTEX_SHADER);
+    glShaderSource(VertexShaderId, 1, &shaderSrc, NULL);
+    glCompileShader(VertexShaderId);
+
+    FragmentShaderId = glCreateShader(GL_FRAGMENT_SHADER);
+    glShaderSource(FragmentShaderId, 1, &shaderSrc, NULL);
+    glCompileShader(FragmentShaderId);
+    ProgramId = glCreateProgram();
+        glAttachShader(ProgramId, VertexShaderId);
+        glAttachShader(ProgramId, FragmentShaderId);
+    glLinkProgram(ProgramId);
+    glUseProgram(ProgramId);
+
+    ErrorCheckValue = glGetError();
+    if (ErrorCheckValue != GL_NO_ERROR)
+    {
+        fprintf(
+            stderr,
+            "ERROR: Could not create the shaders: %s \n",
+            gluErrorString(ErrorCheckValue)
+        );
+
+        exit(-1);
+    }
+
+ /*   std::cout << "GLObject::createShader(const GLchar*, GLenum)" << std::endl;
+    GLenum ErrorCheckValue = glGetError();
+    
     switch(shader)
     {
         case GL_VERTEX_SHADER: 
-            shaderID = VertexShaderId = glCreateShader(GL_VERTEX_SHADER);
-            break;
-
+            VertexShaderId = glCreateShader(GL_VERTEX_SHADER);
+            glShaderSource(VertexShaderId, 1, &VertexShader, NULL);
+            glCompileShader(VertexShaderId);
+        break;
         case GL_FRAGMENT_SHADER: 
-            shaderID = FragmentShaderId = glCreateShader(GL_FRAGMENT_SHADER);
-            break;
+            FragmentShaderId = glCreateShader(GL_FRAGMENT_SHADER);
+            glShaderSource(FragmentShaderId, 1, &FragmentShader, NULL);
+            glCompileShader(FragmentShaderId);
+        break;
     }
-    glShaderSource(shaderID, 1, &shaderSrc, NULL);
-    glCompileShader(shaderID);
-    glAttachShader(ProgramId, shaderID);
-	glLinkProgram(ProgramId);
-    glUseProgram(ProgramId);
 
-	ErrorCheckValue = glGetError();
-	if (ErrorCheckValue != GL_NO_ERROR)
-	{
-		fprintf(
-			stderr,
-			"ERROR: Could not create the shaders: %s \n",
-			gluErrorString(ErrorCheckValue)
-		);
-		exit(-1);
-	}
+    ProgramId = glCreateProgram();
+    glAttachShader(ProgramId, VertexShaderId);  
+    glAttachShader(ProgramId, FragmentShaderId);    
+    glLinkProgram(ProgramId);
+    glUseProgram(ProgramId);
+ 
+    ErrorCheckValue = glGetError();
+    if (ErrorCheckValue != GL_NO_ERROR)
+    {
+        fprintf(
+            stderr,
+            "ERROR: Could not create the shaders: %s \n",
+            gluErrorString(ErrorCheckValue)
+        );
+ 
+        exit(-1);
+    }*/
 }
 
 void GLObject::destroyShaders()

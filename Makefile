@@ -5,8 +5,8 @@
 #
 
 CC = g++
-CFLAGS  = -g -Wall -ggdb 
-CPPFLAGS = -I/home/wezside/Downloads/OpenNI-2.1.0/Include/
+CFLAGS  = -Wall 
+CPPFLAGS = -I/home/wezside/Downloads/OpenNI-2.1.0/Include/ -ggdb
 LDLIBS=-L./ -Wl,-rpath,./ -lGLEW -lglut -lGL -lGLU -lOpenNI2
 
 default: app

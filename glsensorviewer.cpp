@@ -58,6 +58,45 @@ int wezside::GLSensorViewer::init()
 	return openni::STATUS_OK;
 }
 
+void wezside::GLSensorViewer::createVBO()
+{
+	std::cout << "GLSensorViewer::createVBO" << std::endl;
+ 	Vertex Vertices[] =
+    {
+        {{ -0.8f,  0.8f, 0.0f, 1.0f }, { 1.0f, 0.0f, 0.0f, 1.0f }},
+        {{  0.8f,  0.8f, 0.0f, 1.0f }, { 0.0f, 1.0f, 0.0f, 1.0f }},
+        {{ -0.8f, -0.8f, 0.0f, 1.0f }, { 0.0f, 0.0f, 1.0f, 1.0f }},
+        {{  0.8f, -0.8f, 0.0f, 1.0f }, { 0.0f, 0.0f, 1.0f, 1.0f }}
+    };
+ 
+    GLenum ErrorCheckValue = glGetError();
+    const size_t VertexSize = sizeof(Vertices[0]);
+    const size_t RgbOffset = sizeof(Vertices[0].XYZW);    
+     
+    glGenVertexArrays(1, &VaoId);
+    glBindVertexArray(VaoId);
+    
+    glGenBuffers(1, &BufferId);
+    glBindBuffer(GL_ARRAY_BUFFER, BufferId);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(Vertices), Vertices, GL_STATIC_DRAW);
+    glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, VertexSize, 0);
+	glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, VertexSize, (GLvoid*) RgbOffset);
+    glEnableVertexAttribArray(0);
+    glEnableVertexAttribArray(1);
+ 
+    ErrorCheckValue = glGetError();
+    if (ErrorCheckValue != GL_NO_ERROR)
+    {
+        fprintf(
+            stderr,
+            "ERROR: Could not create a VBO: %s \n",
+            gluErrorString(ErrorCheckValue)
+        );
+ 
+        exit(-1);
+    }
+}
+
 void wezside::GLSensorViewer::display()
 {
 	int changedIndex;
@@ -70,16 +109,20 @@ void wezside::GLSensorViewer::display()
 
 	switch (changedIndex)
 	{
-	case 0:
-		m_depthStream.readFrame(&m_depthFrame); break;		
-	case 1:
-		m_colorStream.readFrame(&m_colorFrame); break;
-	default:
-		printf("Error in wait\n");
+		case 0:
+			m_depthStream.readFrame(&m_depthFrame); break;		
+		case 1:
+			m_colorStream.readFrame(&m_colorFrame); break;
+		default:
+			printf("Error in wait\n");
 	}	
 
 	// Read depth frame
 	if (m_depthFrame.isValid()) simpleRead( m_depthFrame);
+
+	// Draw
+	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+
 }
 
 /**
@@ -126,10 +169,8 @@ void wezside::GLSensorViewer::simpleRead(openni::VideoFrameRef& frame)
 		frame.getVideoMode().getPixelFormat() != openni::PIXEL_FORMAT_DEPTH_100_UM)
 	{
 		printf("Unexpected frame format\n");
-		// continue;
 	}
-
 	openni::DepthPixel* pDepth = (openni::DepthPixel*)frame.getData();
 	int middleIndex = (frame.getHeight()+1)*frame.getWidth()/2;
-	printf("[%08llu] %8d\n", (long long)frame.getTimestamp(), pDepth[middleIndex]);	
+	// printf("[%08llu] %8d\n", (long long)frame.getTimestamp(), pDepth[middleIndex]);	
 }

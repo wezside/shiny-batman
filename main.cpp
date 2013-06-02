@@ -23,9 +23,10 @@ int main(int argc, char **argv)
 
     // Set up new GL Object - TODO: Needs to be abstract class
     GLSensorViewer glo("Viewer", sensor.device, sensor.depth, sensor.color);
-    // glShape.loadShader("", GLVertexShape::VERTEX);
-    // glShape.loadShader("", GLVertexShape::FRAGMENT);
+    // glo.loadShader();
     glo.init();
+    // glo.loadShader("demo-shader.vert", GL_VERTEX_SHADER); // custom shader
+    // glo.loadShader("demo-shader.frag", GL_FRAGMENT_SHADER); // custom shader
 
     // Set up our Glut Application 
     GlutApp app;

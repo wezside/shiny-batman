@@ -38,7 +38,7 @@ namespace wezside
             GLSensorViewer(std::string value,
                            openni::Device& device, 
                            openni::VideoStream& depth, 
-                           openni::VideoStream& color ) : GLObject(value),
+                           openni::VideoStream& color ) : 
                                                           m_device(device), 
                                                           m_depthStream(depth), 
                                                           m_colorStream(color), 
@@ -50,6 +50,7 @@ namespace wezside
             void display();
             void simpleRead(openni::VideoFrameRef&);
             void drawColorFrame(openni::VideoFrameRef&);
+            void createVBO();
             
             DisplayModes m_eViewState;
             openni::RGB888Pixel* m_pTexMap;            
