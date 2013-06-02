@@ -213,33 +213,6 @@ void GLObject::loadShader(const char* fname, GLenum shader)
 
 void GLObject::createShader(const GLchar* shaderSrc, GLenum shader)
 {
-/*    GLenum ErrorCheckValue = glGetError();
-     
-    VertexShaderId = glCreateShader(GL_VERTEX_SHADER);
-    glShaderSource(VertexShaderId, 1, &shaderSrc, NULL);
-    glCompileShader(VertexShaderId);
-
-    FragmentShaderId = glCreateShader(GL_FRAGMENT_SHADER);
-    glShaderSource(FragmentShaderId, 1, &shaderSrc, NULL);
-    glCompileShader(FragmentShaderId);
-    ProgramId = glCreateProgram();
-        glAttachShader(ProgramId, VertexShaderId);
-        glAttachShader(ProgramId, FragmentShaderId);
-    glLinkProgram(ProgramId);
-    glUseProgram(ProgramId);
-
-    ErrorCheckValue = glGetError();
-    if (ErrorCheckValue != GL_NO_ERROR)
-    {
-        fprintf(
-            stderr,
-            "ERROR: Could not create the shaders: %s \n",
-            gluErrorString(ErrorCheckValue)
-        );
-
-        exit(-1);
-    }*/
-
     std::cout << "GLObject::createShader(const GLchar*, GLenum)" << std::endl;
     GLenum ErrorCheckValue = glGetError();
     if (shader == GL_VERTEX_SHADER)
@@ -262,7 +235,6 @@ void GLObject::createShader(const GLchar* shaderSrc, GLenum shader)
             "ERROR: Could not create the shaders: %s \n",
             gluErrorString(ErrorCheckValue)
         );
- 
         exit(-1);
     }
 }
