@@ -62,36 +62,79 @@ void wezside::GLSensorViewer::createVBO()
 {
 	std::cout << "GLSensorViewer::createVBO" << std::endl;
 
-	glUtil.translateMatrix(&viewMatrix, 0, 0, -2);
+	// Move back
+	// glUtil.translateMatrix(&viewMatrix, 0, 0, -2);
+	
+
+    glEnable(GL_DEPTH_TEST);
+    glDepthFunc(GL_LESS);
+    glUtil.exitOnGLError("ERROR: Could not set OpenGL depth testing options");
+     
+    glEnable(GL_CULL_FACE);
+    glCullFace(GL_FRONT);
+    glFrontFace(GL_CCW);
+    glUtil.exitOnGLError("ERROR: Could not set OpenGL culling options");
 	
     modelMatrixUniformLocation = glGetUniformLocation(programID, "modelMatrix");
     viewMatrixUniformLocation = glGetUniformLocation(programID, "viewMatrix");
     projectionMatrixUniformLocation = glGetUniformLocation(programID, "projectionMatrix");	
+ 	/*
+ 	// For use with Perspective projection
  	Vertex vertices[] =
     {
         {{ -0.8f,  0.8f, 0.0f, 1.0f }, { 1.0f, 0.0f, 0.0f, 1.0f }},
         {{  0.8f,  0.8f, 0.0f, 1.0f }, { 0.0f, 1.0f, 0.0f, 1.0f }},
         {{ -0.8f, -0.8f, 0.0f, 1.0f }, { 0.0f, 0.0f, 1.0f, 1.0f }},
         {{  0.8f, -0.8f, 0.0f, 1.0f }, { 0.0f, 0.0f, 1.0f, 1.0f }}
-    };
- 
+    };*/
+
+    // For use with Orthogonal projection
+    float wwww = (float)screenWidth;
+    float hhhh = (float)screenHeight;
+	Vertex vertices[] =
+    {
+        {{  0.0f, 0.0f, 0.0f, 1.0f }, { 1.0f, 0.0f, 0.0f, 1.0f }},
+        {{  wwww, 0.0f, 0.0f, 1.0f }, { 0.0f, 1.0f, 0.0f, 1.0f }},
+        {{  0.0f, hhhh, 0.0f, 1.0f }, { 0.0f, 0.0f, 1.0f, 1.0f }},
+        {{  wwww, hhhh, 0.0f, 1.0f }, { 0.0f, 0.0f, 1.0f, 1.0f }}
+    };        
+
     const size_t vertexSize = sizeof(vertices[0]);
     const size_t rgbOffset = sizeof(vertices[0].XYZW);    
-     
+
+	// Create VAO that describes how the vertex attributes are stored in a Vertex Buffer Object 
+	// The VAO is not the actual object storing the vertex data but the descriptor
     glGenVertexArrays(1, &vaoID);
     glBindVertexArray(vaoID);
-    
+
+    // Generate a valid ID used for storage and bind to this new ID so data 
+    // can be copied to GPU's memory
     glGenBuffers(1, &bufferID);
     glBindBuffer(GL_ARRAY_BUFFER, bufferID);
+
+    // Reserve appropriate data storage on the GPU for our vertices
+    // Passsing NULL as "data" param will indicate that the reserved data store 
+    // is uninitialized
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+
+    // Describe vertex attributes stored in GPU's memory
     glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, vertexSize, 0);
 	glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, vertexSize, (GLvoid*) rgbOffset);
+
+	// Enable the vertex attributes 
+	// 0-Vertices 
+	// 1-Colour
     glEnableVertexAttribArray(0);
     glEnableVertexAttribArray(1);
  
  	glUtil.exitOnGLError("ERROR: Could not create a VBO");
 }
 
+/**
+ * This is the draw method where things happen on screen. The first part updates
+ * values and read values from the sensor. The second tells OpenGL to draw the 
+ * Vertex Buffer Objects to screen using the shader programs.
+ */
 void wezside::GLSensorViewer::display()
 {
 	int changedIndex;
@@ -120,8 +163,8 @@ void wezside::GLSensorViewer::display()
 	angle = fmod(angle, 360.0);
 
 	modelMatrix = GLUtils::IDENTITY_MATRIX;
-	glUtil.rotateAboutY(&modelMatrix, glUtil.degreesToRadians(angle));
-	glUtil.rotateAboutX(&modelMatrix, glUtil.degreesToRadians(angle));
+	// glUtil.rotateAboutY(&modelMatrix, glUtil.degreesToRadians(angle));
+	// glUtil.rotateAboutX(&modelMatrix, glUtil.degreesToRadians(angle));
 
 	// Make the shader program active
 	glUseProgram(programID);

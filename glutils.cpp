@@ -125,6 +125,62 @@ wezside::GLUtils::Matrix wezside::GLUtils::createProjectionMatrix(
 	return out;
 }
 
+wezside::GLUtils::Matrix wezside::GLUtils::createOrthogonalMatrix(
+	float near,
+	float far,
+	float left,
+	float right,
+	float bottom,
+	float top
+	)
+{
+	float a = 2.0f / (right - left);
+    float b = 2.0f / (top - bottom);
+    float c = -2.0f / (far - near);
+
+    float tx = - (right + left)/(right - left);
+    float ty = - (top + bottom)/(top - bottom);
+    float tz = - (far + near)/(far - near);
+
+    Matrix out = {{
+		a, 0, 0, 0,
+		0, b, 0, 0,
+		0, 0, c, 0,
+		tx, ty, tz, 1
+    }};
+
+	// These paramaters are lens properties.
+    // The "near" and "far" create the Depth of Field.
+    // The "left", "right", "bottom" and "top" represent the rectangle formed
+    // by the near area, this rectangle will also be the size of the visible area.
+     
+    // First Column 0, 4, 8, 12
+/*    out.m[0] = 2.0 / (right - left);
+    out.m[4] = 0.0;
+    out.m[8] = 0.0;
+    out.m[12] = 0.0;
+ 
+    // Second Column 1,5,9,13
+    out.m[1] = 0.0;
+    out.m[5] = 2.0 / (top - bottom);
+    out.m[9] = 0.0;
+    out.m[13] = 0.0;
+ 
+    // Third Column 2,6,10,14
+    out.m[2] = 0.0;
+    out.m[6] = 0.0;
+    out.m[10] = -2.0/(far - near);
+    out.m[14] = 0.0;
+ 
+    // Fourth Column 3,7,11,15
+    out.m[3] = -(right + left) / (right - left);
+    out.m[7] = -(top + bottom) / (top - bottom);
+    out.m[11] = -(far + near) / (far - near);
+    out.m[15] = 1.0;	*/
+
+    return out;
+}
+
 void wezside::GLUtils::exitOnGLError(const char* error_message)
 {
 	const GLenum ErrorValue = glGetError();

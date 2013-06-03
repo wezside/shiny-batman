@@ -44,6 +44,7 @@ namespace wezside
             const GLchar* vertexShader;
             const GLchar* fragmentShader;
             GLUtils glUtil;
+            int screenWidth, screenHeight;
 
         public:
             GLObject(std::string value = "default") : 
@@ -52,6 +53,8 @@ namespace wezside
                 modelMatrix(GLUtils::IDENTITY_MATRIX),
                 projectionMatrix(GLUtils::IDENTITY_MATRIX),
                 viewMatrix(GLUtils::IDENTITY_MATRIX),
+                screenWidth(640),
+                screenHeight(480),
                 vertexShader(
                 "#version 330\n"\
 

@@ -38,6 +38,14 @@ namespace wezside
 			float near_plane,
 			float far_plane
 		);
+		Matrix createOrthogonalMatrix(
+			float near,
+			float far,
+			float left,
+			float right,
+			float bottom,
+			float top
+		);
 		void exitOnGLError(const char* error_message);
 
 	};
