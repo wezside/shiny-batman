@@ -33,6 +33,7 @@ namespace wezside
                 bufferID,
                 indexBufferID[2],
             	activeIndexBuffer,
+                samplerLoc,
                 projectionMatrixUniformLocation,
                 viewMatrixUniformLocation,
                 modelMatrixUniformLocation;

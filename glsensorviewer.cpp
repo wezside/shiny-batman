@@ -76,6 +76,7 @@ void wezside::GLSensorViewer::createVBO()
     glFrontFace(GL_CCW);
     glUtil.exitOnGLError("ERROR: Could not set OpenGL culling options");
 	
+	samplerLoc = glGetUniformLocation(programID, "s_texture");	
     modelMatrixUniformLocation = glGetUniformLocation(programID, "modelMatrix");
     viewMatrixUniformLocation = glGetUniformLocation(programID, "viewMatrix");
     projectionMatrixUniformLocation = glGetUniformLocation(programID, "projectionMatrix");	
@@ -131,12 +132,13 @@ void wezside::GLSensorViewer::createVBO()
  	glUtil.exitOnGLError("ERROR: Could not create a VBO");
 
  	// Texture initialise
- 	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+ 	// glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
  	// Generate texture objects
  	glGenTextures(1, &textureID);
 
  	// Bind the texture object
+ 	glActiveTexture(GL_TEXTURE0);
  	glBindTexture(GL_TEXTURE_2D, textureID);
 
  	// Load the texture
@@ -210,7 +212,10 @@ void wezside::GLSensorViewer::display()
 	glUniformMatrix4fv(viewMatrixUniformLocation, 1, GL_FALSE, viewMatrix.m);
 	glUtil.exitOnGLError("ERROR: Could not set the shader uniforms");
 
+	// Bind the texture
+	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, textureID);
+	glUniform1i(samplerLoc, 0);
  	glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, m_nTexMapX, m_nTexMapY, GL_RGB, GL_UNSIGNED_BYTE, m_pTexMap);
 
 	glBindVertexArray(vaoID);
@@ -253,10 +258,7 @@ void wezside::GLSensorViewer::drawColorFrame(openni::VideoFrameRef& frame)
 			pImageRow += rowSize;
 			pTexRow += m_nTexMapX;
 		}
-	}	
-
-	// Set up texture
-	
+	}
 }
 
 /** 
