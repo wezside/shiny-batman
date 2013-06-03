@@ -53,6 +53,7 @@ namespace wezside
             void simpleRead(openni::VideoFrameRef&);
             void drawColorFrame(openni::VideoFrameRef&);
             void createVBO();
+            void resize(int, int);
             
             DisplayModes m_eViewState;
             openni::RGB888Pixel* m_pTexMap;            

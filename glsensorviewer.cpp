@@ -130,6 +130,25 @@ void wezside::GLSensorViewer::createVBO()
  	glUtil.exitOnGLError("ERROR: Could not create a VBO");
 }
 
+void wezside::GLSensorViewer::resize(int w, int h)
+{
+    screenWidth = w;
+    screenHeight = h;
+    printf("GLObject::resize(%d,%d)\n", w, h);
+
+    // Orthogonal Projeciton
+    projectionMatrix =
+        glUtil.createOrthogonalMatrix(
+           0.001, 100.0, 0.0, (float)w, (float)h, 0.0
+        );
+
+    glUtil.translateMatrix(&viewMatrix, 0, 0, -0.01);
+
+    glUseProgram(programID);
+    glUniformMatrix4fv(projectionMatrixUniformLocation, 1, GL_FALSE, projectionMatrix.m);
+    glUseProgram(0);    
+}
+
 /**
  * This is the draw method where things happen on screen. The first part updates
  * values and read values from the sensor. The second tells OpenGL to draw the 

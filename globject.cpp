@@ -239,25 +239,15 @@ void GLObject::resize(int w, int h)
     screenWidth = w;
     screenHeight = h;
     printf("GLObject::resize(%d,%d)\n", w, h);
-    // projectionMatrix =
-    //     glUtil.createProjectionMatrix(
-    //         60,
-    //         (float)w / h,
-    //         1.0f,
-    //         100.0f
-    //     );
-
-    // Orthogonal Projeciton
-    // For top left origin use formula where depthRange is zNear/zFar
-    // Translate(-1.0f, 1.0f, (depthRange.x + depthRange.y) / 2.0f);
-    // Scale(2.0f / width, -2.0f / height, 1.0f);
     projectionMatrix =
-        glUtil.createOrthogonalMatrix(
-           0.001, 100.0, 0.0, (float)w, (float)h, 0.0
+        glUtil.createProjectionMatrix(
+            60,
+            (float)w / h,
+            1.0f,
+            100.0f
         );
-
-    glUtil.translateMatrix(&viewMatrix, 0, 0, -0.01);
-
+    // Move the Eye(Cam) space backwards so we can see all
+    glUtil.translateMatrix(&viewMatrix, 0, 0, -2);
     glUseProgram(programID);
     glUniformMatrix4fv(projectionMatrixUniformLocation, 1, GL_FALSE, projectionMatrix.m);
     glUseProgram(0);    
