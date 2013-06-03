@@ -62,10 +62,6 @@ void wezside::GLSensorViewer::createVBO()
 {
 	std::cout << "GLSensorViewer::createVBO" << std::endl;
 
-	// Move back
-	// glUtil.translateMatrix(&viewMatrix, 0, 0, -2);
-	
-
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LESS);
     glUtil.exitOnGLError("ERROR: Could not set OpenGL depth testing options");

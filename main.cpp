@@ -24,10 +24,12 @@ int main(int argc, char **argv)
     // Set up new GL Object - TODO: Needs to be abstract class
     GLSensorViewer glo("Viewer", sensor.device, sensor.depth, sensor.color);
     glo.init();
+    // GLObject glo;
 
     // Set up our Glut Application 
     GlutApp app;
     app.glo = (GLObject*)&glo;
+    // app.init(argc, argv); 
     app.init(argc, argv, "demo-rotate-shader.vert.glsl", "demo-rotate-shader.frag.glsl"); 
     app.render();
 

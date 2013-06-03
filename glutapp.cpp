@@ -77,6 +77,7 @@ void GlutApp::init( int argc, char** argv, const char* fVertex, const char* fFra
     initGLStates();
 
     // Create Vertex Buffer Objects
+    // Use built-in default shaders or load external
     if (fVertex == NULL || fFragment == NULL) glo->loadShader();
     else
     {
@@ -167,16 +168,6 @@ void GlutApp::display(void)
 
 	// Call GLObj display here
 	glo->display();
-
-    // Draw stuff here
-/*	if (glo->getActiveIndexBuffer() == 0)
-	{
-		glDrawElements(GL_TRIANGLES, 48, GL_UNSIGNED_BYTE, NULL);
-	}
-	else
-	{
-		glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_BYTE, NULL);
-	}*/
 
 	glutSwapBuffers();
 	glutPostRedisplay();

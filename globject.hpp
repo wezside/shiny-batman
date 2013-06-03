@@ -61,10 +61,12 @@ namespace wezside
                 "layout(location=0) in vec4 in_Position;\n"\
                 "layout(location=1) in vec4 in_Color;\n"\
                 "out vec4 ex_Color;\n"\
-
+                "uniform mat4 modelMatrix;\n"\
+                "uniform mat4 viewMatrix;\n"\
+                "uniform mat4 projectionMatrix;\n"\
                 "void main(void)\n"\
                 "{\n"\
-                "   gl_Position = in_Position;\n"\
+                "   gl_Position = (projectionMatrix * viewMatrix * modelMatrix) * in_Position;\n"\
                 "   ex_Color = in_Color;\n"\
                 "}\n"),
                 fragmentShader(
@@ -85,7 +87,7 @@ namespace wezside
             }
             virtual void createShader(const GLchar*, GLenum);
             virtual std::string getName();
-            virtual void display(){};
+            virtual void display();
             virtual void createVBO();
             virtual void destroyVBO();
             virtual void destroyShaders(void);

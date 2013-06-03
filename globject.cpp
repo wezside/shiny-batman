@@ -11,6 +11,7 @@ string GLObject::getName()
 void GLObject::createVBO()
 {
     cout << "GLObject::createVBO" << endl;
+
     Vertex vertices[] =
     {
         { { 0.0f, 0.0f, 0.0f, 1.0f }, { 1.0f, 1.0f, 1.0f, 1.0f } }, // 0
@@ -91,6 +92,17 @@ void GLObject::createVBO()
         0, 7, 11
     };
 
+    glUtil.translateMatrix(&viewMatrix, 0, 0, -2.0);
+
+    glEnable(GL_DEPTH_TEST);
+    glDepthFunc(GL_LESS);
+    glUtil.exitOnGLError("ERROR: Could not set OpenGL depth testing options");
+     
+    glEnable(GL_CULL_FACE);
+    glCullFace(GL_FRONT);
+    glFrontFace(GL_CCW);
+    glUtil.exitOnGLError("ERROR: Could not set OpenGL culling options");
+
     modelMatrixUniformLocation = glGetUniformLocation(programID, "ModelMatrix");
     viewMatrixUniformLocation = glGetUniformLocation(programID, "ViewMatrix");
     projectionMatrixUniformLocation = glGetUniformLocation(programID, "ProjectionMatrix");
@@ -151,8 +163,17 @@ void GLObject::destroyVBO()
 void GLObject::loadShader()
 {
     std::cout << "GLObject::loadShader()" << std::endl;   
-    createShader(vertexShader, GL_VERTEX_SHADER);
-    createShader(fragmentShader, GL_FRAGMENT_SHADER);
+    // createShader(vertexShader, GL_VERTEX_SHADER);
+    // createShader(fragmentShader, GL_FRAGMENT_SHADER);
+    GLenum ErrorCheckValue = glGetError();
+    vertexShaderId = glCreateShader(GL_VERTEX_SHADER);
+    glShaderSource(vertexShaderId, 1, &vertexShader, NULL);
+    glCompileShader(vertexShaderId);
+
+    fragmentShaderId = glCreateShader(GL_FRAGMENT_SHADER);
+    glShaderSource(fragmentShaderId, 1, &fragmentShader, NULL);
+    glCompileShader(fragmentShaderId);
+    glUtil.exitOnGLError("ERROR: Could not create the shaders");    
 }
 
 void GLObject::loadShader(const char* fname, GLenum shader)
@@ -193,8 +214,6 @@ void GLObject::createShader(const GLchar* shaderSrc, GLenum shader)
 void GLObject::glslProgram()
 {
     GLint tmp;
-    glGetIntegerv(GL_CURRENT_PROGRAM, &tmp);
-    std::cout << "GLObject::Current GLSLS Program " << programID << std::endl;    
     GLenum ErrorCheckValue = glGetError();
     programID = glCreateProgram();
     glAttachShader(programID, vertexShaderId);  
@@ -202,6 +221,8 @@ void GLObject::glslProgram()
     glLinkProgram(programID);
     glUseProgram(programID);
 
+    glGetIntegerv(GL_CURRENT_PROGRAM, &tmp);
+    std::cout << "GLObject::Current GLSLS Program " << programID << std::endl;    
     glUtil.exitOnGLError("ERROR: Could not create the GLSL program");
 }
 void GLObject::destroyShaders()
@@ -233,6 +254,34 @@ void GLObject::onKey(unsigned char key, int x, int y)
         }
         default: break;
     }
+}
+void GLObject::display()
+{
+    // Draw stuff here
+    // Make the shader program active
+    glUseProgram(programID);
+    glUtil.exitOnGLError("ERROR: Could not use the shader program");    
+
+    // Update the shader Uniform variables
+    glUniformMatrix4fv(modelMatrixUniformLocation, 1, GL_FALSE, modelMatrix.m);
+    glUniformMatrix4fv(viewMatrixUniformLocation, 1, GL_FALSE, viewMatrix.m);
+    glUtil.exitOnGLError("ERROR: Could not set the shader uniforms");
+
+    glBindVertexArray(vaoID);
+    glUtil.exitOnGLError("ERROR: Could not bind the VAO for drawing purposes");
+    if (getActiveIndexBuffer() == 0)
+    {
+        glDrawElements(GL_TRIANGLES, 48, GL_UNSIGNED_BYTE, NULL);
+    }
+    else
+    {
+        glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_BYTE, NULL);
+    }    
+    glUtil.exitOnGLError("ERROR: Could not draw");
+
+    // Cleanup
+    glBindVertexArray(0);
+    glUseProgram(0);    
 }
 void GLObject::resize(int w, int h)
 {
