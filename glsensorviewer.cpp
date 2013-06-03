@@ -1,5 +1,10 @@
 #include "glsensorviewer.hpp"
 
+wezside::GLSensorViewer::~GLSensorViewer()
+{
+	delete[] m_streams;
+	delete[] m_pTexMap;
+}
 int wezside::GLSensorViewer::init()
 {
 	openni::VideoMode depthVideoMode;
@@ -171,7 +176,7 @@ void wezside::GLSensorViewer::display()
 	}	
 
 	// Read depth frame
-	if (m_depthFrame.isValid()) simpleRead( m_depthFrame);
+	if (m_depthFrame.isValid()) simpleRead(m_depthFrame);
 
 	// Draw OpenGL
 	angle += 1.0f;

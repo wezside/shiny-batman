@@ -6,22 +6,18 @@ const wezside::GLUtils::Matrix wezside::GLUtils::IDENTITY_MATRIX = {{
 	0, 0, 1, 0,
 	0, 0, 0, 1
 }};
-
 float wezside::GLUtils::cotangent(float angle)
 {
 	return (float)(1.0 / tan(angle));
 }
-
 float wezside::GLUtils::degreesToRadians(float degrees)
 {
 	return degrees * (float)(PI / 180);
 }
-
 float wezside::GLUtils::radiansToDegrees(float radians)
 {
 	return radians * (float)(180 / PI);
 }
-
 wezside::GLUtils::Matrix wezside::GLUtils::multiplyMatrices(const Matrix* m1, const Matrix* m2)
 {
 	wezside::GLUtils::Matrix out = GLUtils::IDENTITY_MATRIX;
@@ -37,7 +33,6 @@ wezside::GLUtils::Matrix wezside::GLUtils::multiplyMatrices(const Matrix* m1, co
 
 	return out;
 }
-
 void wezside::GLUtils::scaleMatrix(Matrix* m, float x, float y, float z)
 {
 	Matrix scale = IDENTITY_MATRIX;
@@ -48,7 +43,6 @@ void wezside::GLUtils::scaleMatrix(Matrix* m, float x, float y, float z)
 
 	memcpy(m->m, multiplyMatrices(m, &scale).m, sizeof(m->m));
 }
-
 void wezside::GLUtils::translateMatrix(Matrix* m, float x, float y, float z)
 {
 	Matrix translation = IDENTITY_MATRIX;
@@ -59,7 +53,6 @@ void wezside::GLUtils::translateMatrix(Matrix* m, float x, float y, float z)
 
 	memcpy(m->m, multiplyMatrices(m, &translation).m, sizeof(m->m));
 }
-
 void wezside::GLUtils::rotateAboutX(Matrix* m, float angle)
 {
 	Matrix rotation = IDENTITY_MATRIX;
@@ -73,7 +66,6 @@ void wezside::GLUtils::rotateAboutX(Matrix* m, float angle)
 
 	memcpy(m->m, multiplyMatrices(m, &rotation).m, sizeof(m->m));
 }
-
 void wezside::GLUtils::rotateAboutY(Matrix* m, float angle)
 {
 	Matrix rotation = IDENTITY_MATRIX;
@@ -87,7 +79,6 @@ void wezside::GLUtils::rotateAboutY(Matrix* m, float angle)
 
 	memcpy(m->m, multiplyMatrices(m, &rotation).m, sizeof(m->m));
 }
-
 void wezside::GLUtils::rotateAboutZ(Matrix* m, float angle)
 {
 	Matrix rotation = IDENTITY_MATRIX;
@@ -101,7 +92,6 @@ void wezside::GLUtils::rotateAboutZ(Matrix* m, float angle)
 
 	memcpy(m->m, multiplyMatrices(m, &rotation).m, sizeof(m->m));
 }
-
 wezside::GLUtils::Matrix wezside::GLUtils::createProjectionMatrix(
 	float fovy,
 	float aspect_ratio,
@@ -124,7 +114,6 @@ wezside::GLUtils::Matrix wezside::GLUtils::createProjectionMatrix(
 	
 	return out;
 }
-
 wezside::GLUtils::Matrix wezside::GLUtils::createOrthogonalMatrix(
 	float near,
 	float far,
@@ -148,39 +137,8 @@ wezside::GLUtils::Matrix wezside::GLUtils::createOrthogonalMatrix(
 		0, 0, c, 0,
 		tx, ty, tz, 1
     }};
-
-	// These paramaters are lens properties.
-    // The "near" and "far" create the Depth of Field.
-    // The "left", "right", "bottom" and "top" represent the rectangle formed
-    // by the near area, this rectangle will also be the size of the visible area.
-     
-    // First Column 0, 4, 8, 12
-/*    out.m[0] = 2.0 / (right - left);
-    out.m[4] = 0.0;
-    out.m[8] = 0.0;
-    out.m[12] = 0.0;
- 
-    // Second Column 1,5,9,13
-    out.m[1] = 0.0;
-    out.m[5] = 2.0 / (top - bottom);
-    out.m[9] = 0.0;
-    out.m[13] = 0.0;
- 
-    // Third Column 2,6,10,14
-    out.m[2] = 0.0;
-    out.m[6] = 0.0;
-    out.m[10] = -2.0/(far - near);
-    out.m[14] = 0.0;
- 
-    // Fourth Column 3,7,11,15
-    out.m[3] = -(right + left) / (right - left);
-    out.m[7] = -(top + bottom) / (top - bottom);
-    out.m[11] = -(far + near) / (far - near);
-    out.m[15] = 1.0;	*/
-
     return out;
 }
-
 void wezside::GLUtils::exitOnGLError(const char* error_message)
 {
 	const GLenum ErrorValue = glGetError();
