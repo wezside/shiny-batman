@@ -6,7 +6,7 @@
 #include "globject.hpp"
 
 #define TEXTURE_SIZE 512
-#define DEFAULT_DISPLAY_MODE DISPLAY_MODE_DEPTH
+#define DEFAULT_DISPLAY_MODE DISPLAY_MODE_IMAGE
 #define MIN_NUM_CHUNKS(data_size, chunk_size)   ((((data_size)-1) / (chunk_size) + 1))
 #define MIN_CHUNKS_SIZE(data_size, chunk_size)  (MIN_NUM_CHUNKS(data_size, chunk_size) * (chunk_size))
 
@@ -16,7 +16,7 @@ namespace wezside
     {
         DISPLAY_MODE_OVERLAY,
         DISPLAY_MODE_DEPTH,
-        DISPLAY_MODE_IMAGE
+        DISPLAY_MODE_IMAGE 
     };
 
     class GLSensorViewer : public GLObject
@@ -34,6 +34,7 @@ namespace wezside
             unsigned int m_nTexMapX;
             unsigned int m_nTexMapY;         
             float angle;
+            GLuint textureID;
 
         public:
             GLSensorViewer(std::string value,

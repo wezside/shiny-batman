@@ -79,6 +79,7 @@ void wezside::GLSensorViewer::createVBO()
     modelMatrixUniformLocation = glGetUniformLocation(programID, "modelMatrix");
     viewMatrixUniformLocation = glGetUniformLocation(programID, "viewMatrix");
     projectionMatrixUniformLocation = glGetUniformLocation(programID, "projectionMatrix");	
+ 
  	/*
  	// For use with Perspective projection
  	Vertex vertices[] =
@@ -127,8 +128,24 @@ void wezside::GLSensorViewer::createVBO()
 	// 1-Colour
     glEnableVertexAttribArray(0);
     glEnableVertexAttribArray(1);
- 
  	glUtil.exitOnGLError("ERROR: Could not create a VBO");
+
+ 	// Texture initialise
+ 	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+
+ 	// Generate texture objects
+ 	glGenTextures(1, &textureID);
+
+ 	// Bind the texture object
+ 	glBindTexture(GL_TEXTURE_2D, textureID);
+
+ 	// Load the texture
+ 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, m_nTexMapX, m_nTexMapY, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+	glUtil.exitOnGLError("ERROR: Could not create a VBO");
+
+ 	// Set the filtering mode
+ 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+ 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 }
 
 void wezside::GLSensorViewer::resize(int w, int h)
@@ -140,10 +157,8 @@ void wezside::GLSensorViewer::resize(int w, int h)
     // Orthogonal Projeciton
     projectionMatrix =
         glUtil.createOrthogonalMatrix(
-           0.001, 100.0, 0.0, (float)w, (float)h, 0.0
+           -1, 100.0, 0.0, (float)w, (float)h, 0.0
         );
-
-    glUtil.translateMatrix(&viewMatrix, 0, 0, -0.01);
 
     glUseProgram(programID);
     glUniformMatrix4fv(projectionMatrixUniformLocation, 1, GL_FALSE, projectionMatrix.m);
@@ -164,7 +179,6 @@ void wezside::GLSensorViewer::display()
 		printf("Wait failed\n");
 		return;
 	}
-
 	switch (changedIndex)
 	{
 		case 0:
@@ -177,6 +191,7 @@ void wezside::GLSensorViewer::display()
 
 	// Read depth frame
 	if (m_depthFrame.isValid()) simpleRead(m_depthFrame);
+	if (m_colorFrame.isValid()) drawColorFrame(m_colorFrame);
 
 	// Draw OpenGL
 	angle += 1.0f;
@@ -195,6 +210,9 @@ void wezside::GLSensorViewer::display()
 	glUniformMatrix4fv(viewMatrixUniformLocation, 1, GL_FALSE, viewMatrix.m);
 	glUtil.exitOnGLError("ERROR: Could not set the shader uniforms");
 
+	glBindTexture(GL_TEXTURE_2D, textureID);
+ 	glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, m_nTexMapX, m_nTexMapY, GL_RGB, GL_UNSIGNED_BYTE, m_pTexMap);
+
 	glBindVertexArray(vaoID);
 	glUtil.exitOnGLError("ERROR: Could not bind the VAO for drawing purposes");
 
@@ -204,6 +222,7 @@ void wezside::GLSensorViewer::display()
 	// Cleanup
 	glBindVertexArray(0);
 	glUseProgram(0);
+	glBindTexture(GL_TEXTURE_2D, 0);
 }
 
 /**
@@ -221,7 +240,6 @@ void wezside::GLSensorViewer::drawColorFrame(openni::VideoFrameRef& frame)
 		const openni::RGB888Pixel* pImageRow = (const openni::RGB888Pixel*)frame.getData();
 		openni::RGB888Pixel* pTexRow = m_pTexMap + frame.getCropOriginY() * m_nTexMapX;
 		int rowSize = frame.getStrideInBytes() / sizeof(openni::RGB888Pixel);
-
 		for (int y = 0; y < frame.getHeight(); ++y)
 		{
 			const openni::RGB888Pixel* pImage = pImageRow;
@@ -246,6 +264,7 @@ void wezside::GLSensorViewer::drawColorFrame(openni::VideoFrameRef& frame)
  */
 void wezside::GLSensorViewer::simpleRead(openni::VideoFrameRef& frame)
 {
+	if (m_eViewState != DISPLAY_MODE_DEPTH) return;
 	if (frame.getVideoMode().getPixelFormat() != openni::PIXEL_FORMAT_DEPTH_1_MM && 
 		frame.getVideoMode().getPixelFormat() != openni::PIXEL_FORMAT_DEPTH_100_UM)
 	{

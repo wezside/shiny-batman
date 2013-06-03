@@ -30,7 +30,7 @@ int main(int argc, char **argv)
     GlutApp app;
     app.glo = (GLObject*)&glo;
     // app.init(argc, argv); 
-    app.init(argc, argv, "demo-rotate-shader.vert.glsl", "demo-rotate-shader.frag.glsl"); 
+    app.init(argc, argv, "shader.vert.glsl", "shader.frag.glsl"); 
     app.render();
 
 	return EXIT_SUCCESS;
