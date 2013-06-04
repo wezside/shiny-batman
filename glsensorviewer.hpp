@@ -5,8 +5,8 @@
 #include <OpenNI.h>
 #include "globject.hpp"
 
-#define TEXTURE_SIZE 1
-#define DEFAULT_DISPLAY_MODE DISPLAY_MODE_IMAGE
+#define TEXTURE_SIZE 2
+#define DEFAULT_DISPLAY_MODE DISPLAY_MODE_DEPTH
 #define MIN_NUM_CHUNKS(data_size, chunk_size)   ((((data_size)-1) / (chunk_size) + 1))
 #define MIN_CHUNKS_SIZE(data_size, chunk_size)  (MIN_NUM_CHUNKS(data_size, chunk_size) * (chunk_size))
 
@@ -30,10 +30,11 @@ namespace wezside
             openni::VideoStream** m_streams;
 
             int m_width;
-            int m_height;            
+            int m_height;    
             unsigned int m_nTexMapX;
             unsigned int m_nTexMapY;         
             float angle;
+            int depthReading;
             GLuint textureID;
 
         public:
@@ -47,13 +48,14 @@ namespace wezside
                                                           m_streams(NULL), 
                                                           m_eViewState(DEFAULT_DISPLAY_MODE), 
                                                           m_pTexMap(NULL),
-                                                          angle(0)
+                                                          angle(0),
+                                                          depthReading(0)
                             {};
 			~GLSensorViewer();                         
 			int init(void);
 			void draw();
             void update();
-			void simpleRead(openni::VideoFrameRef&);
+			int simpleRead(openni::VideoFrameRef& frame);
 			void drawColorFrame(openni::VideoFrameRef&);
 			void createVBO();
 			void resize(int, int);

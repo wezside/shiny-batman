@@ -8,7 +8,7 @@ wezside::Sensor::~Sensor()
 }
 void wezside::Sensor::clean()
 {
-	openni::OpenNI::shutdown();
+	// openni::OpenNI::shutdown();
 	depth.stop();
 	color.stop();
 	depth.destroy();

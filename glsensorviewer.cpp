@@ -5,12 +5,14 @@ wezside::GLSensorViewer::~GLSensorViewer()
 	printf("%s\n", "wezside::GLSensorViewer::~GLSensorViewer()");
 	delete[] m_streams;
 	delete[] m_pTexMap;
+	m_depthFrame.release();
+	m_colorFrame.release();
 	m_depthStream.stop();
-	m_colorStream.stop();
 	m_depthStream.destroy();
+	m_colorStream.stop();
 	m_colorStream.destroy();
 	m_device.close();
-	openni::OpenNI::shutdown();	
+	// openni::OpenNI::shutdown();	
 }
 int wezside::GLSensorViewer::init()
 {
@@ -115,20 +117,20 @@ void wezside::GLSensorViewer::createVBO()
     // For use with Orthogonal projection
     float wwww = (float)screenWidth;
     float hhhh = (float)screenHeight;
-    wwww = 1024;
-    hhhh = 576;
+
     // Note: The problem with this sort of packing is - you can't update
     // portions of data - the entire vertex array need to be unpacked to the GPU.
     // A better approach is to use XYWZ XYWZ XYWZ RGBA RGBA RGBA UV UV UV UV 
-    // Currently it is XYWZ RGBA UV XYWZ RGBA UV
+    // Currently it is XYWZ RGBA UV XYWZ RGBA UV. The former means we can use 
+    // glBufferSubData to only update a sub section.
 	Vertex vertices[] =
-    {
-    	// XYZW							// RGBA						// UV
-        {{  0.0f, 0.0f, 0.0f, 1.0f }, { 1.0f, 0.0f, 0.0f, 1.0f }, { 1.0f, 0.0f }},
-        {{  wwww, 0.0f, 0.0f, 1.0f }, { 0.0f, 1.0f, 0.0f, 1.0f }, { 0.0f, 0.0f }},
-        {{  0.0f, hhhh, 0.0f, 1.0f }, { 0.0f, 0.0f, 1.0f, 1.0f }, { 1.0f, 1.0f }},
-        {{  wwww, hhhh, 0.0f, 1.0f }, { 0.0f, 0.0f, 1.0f, 1.0f }, { 0.0f, 1.0f }}
-    };        
+	{
+			// XYZW							// RGBA						// UV
+		{{  0.0f, 0.0f, 0.0f, 1.0f }, { 1.0f, 0.0f, 0.0f, 1.0f }, {  -1.0f, 0.0f }},
+		{{  wwww, 0.0f, 0.0f, 1.0f }, { 0.0f, 1.0f, 0.0f, 1.0f }, {  0.0f, 0.0f }},
+		{{  0.0f, hhhh, 0.0f, 1.0f }, { 0.0f, 0.0f, 1.0f, 1.0f }, {  -1.0f, 1.0f }},
+		{{  wwww, hhhh, 0.0f, 1.0f }, { 0.0f, 0.0f, 1.0f, 1.0f }, {  0.0f, 1.0f }}
+	};        
 
     const size_t vertexSize = sizeof(vertices[0]);
     const size_t rgbOffset = sizeof(vertices[0].XYZW);    
@@ -225,9 +227,11 @@ void wezside::GLSensorViewer::update()
 	}	
 
 	// Read depth frame
-	if (m_depthFrame.isValid()) simpleRead(m_depthFrame);
+	m_eViewState = DISPLAY_MODE_DEPTH;
+	if (m_depthFrame.isValid()) depthReading = simpleRead(m_depthFrame);
+	m_eViewState = DISPLAY_MODE_IMAGE;
 	if (m_colorFrame.isValid()) drawColorFrame(m_colorFrame);
-
+	// printf("%f\n", (depthReading/1050.0)*9);
 	// Draw OpenGL
 	angle += 1.0f;
 	angle = fmod(angle, 360.0);
@@ -251,14 +255,13 @@ void wezside::GLSensorViewer::draw()
 	glEnableVertexAttribArray(0);
 	glEnableVertexAttribArray(1);
 	glEnableVertexAttribArray(2);
+
 	// Bind the texture
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, textureID);
+
+	// Use texture bound to location 0 (TEXTURE0)
 	glUniform1i(samplerLoc, 0);
- // 	glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, m_nTexMapX, m_nTexMapY, GL_RGB, GL_UNSIGNED_BYTE, m_pTexMap);
-	// glTexParameteri(GL_TEXTURE_2D, GL_GENERATE_MIPMAP_SGIS, GL_TRUE);
-	// glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-	// glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, m_nTexMapX, m_nTexMapY, 0, GL_RGB, GL_UNSIGNED_BYTE, m_pTexMap);
 	glUtil.exitOnGLError("ERROR: Could not bind the texture");
 
@@ -284,12 +287,11 @@ void wezside::GLSensorViewer::drawColorFrame(openni::VideoFrameRef& frame)
 
 	// check if we need to draw image frame to texture
 	if ((m_eViewState == DISPLAY_MODE_OVERLAY ||
-		m_eViewState == DISPLAY_MODE_IMAGE) && frame.isValid())
+		 m_eViewState == DISPLAY_MODE_IMAGE) && frame.isValid())
 	{
 		const openni::RGB888Pixel* pImageRow = (const openni::RGB888Pixel*)frame.getData();
 		openni::RGB888Pixel* pTexRow = m_pTexMap + frame.getCropOriginY() * m_nTexMapX;
 		int rowSize = frame.getStrideInBytes() / sizeof(openni::RGB888Pixel);
-		// printf("%dx%d\n", frame.getWidth(), frame.getHeight());
 		for (int y = 0; y < frame.getHeight(); ++y)
 		{
 			const openni::RGB888Pixel* pImage = pImageRow;
@@ -299,7 +301,6 @@ void wezside::GLSensorViewer::drawColorFrame(openni::VideoFrameRef& frame)
 			{
 				*pTex = *pImage;
 			}
-
 			pImageRow += rowSize;
 			pTexRow += m_nTexMapX;
 		}
@@ -309,9 +310,9 @@ void wezside::GLSensorViewer::drawColorFrame(openni::VideoFrameRef& frame)
 /** 
  * This method will simply return the center point depth value.
  */
-void wezside::GLSensorViewer::simpleRead(openni::VideoFrameRef& frame)
+int wezside::GLSensorViewer::simpleRead(openni::VideoFrameRef& frame)
 {
-	if (m_eViewState != DISPLAY_MODE_DEPTH) return;
+	if (m_eViewState != DISPLAY_MODE_DEPTH) return -1;
 	if (frame.getVideoMode().getPixelFormat() != openni::PIXEL_FORMAT_DEPTH_1_MM && 
 		frame.getVideoMode().getPixelFormat() != openni::PIXEL_FORMAT_DEPTH_100_UM)
 	{
@@ -320,4 +321,5 @@ void wezside::GLSensorViewer::simpleRead(openni::VideoFrameRef& frame)
 	openni::DepthPixel* pDepth = (openni::DepthPixel*)frame.getData();
 	int middleIndex = (frame.getHeight()+1)*frame.getWidth()/2;
 	// printf("[%08llu] %8d\n", (long long)frame.getTimestamp(), pDepth[middleIndex]);	
+	return pDepth[middleIndex];
 }
