@@ -2,6 +2,12 @@
 
 wezside::GLSensorViewer::~GLSensorViewer()
 {
+	m_depthStream.stop();
+	m_colorStream.stop();
+	m_depthStream.destroy();
+	m_colorStream.destroy();
+	m_device.close();
+	openni::OpenNI::shutdown();	
 	delete[] m_streams;
 	delete[] m_pTexMap;
 }
@@ -76,6 +82,7 @@ void wezside::GLSensorViewer::createVBO()
     glFrontFace(GL_CCW);
     glUtil.exitOnGLError("ERROR: Could not set OpenGL culling options");
 	
+	texCoordLoc = glGetUniformLocation(programID, "in_TexCoord");	
 	samplerLoc = glGetUniformLocation(programID, "s_texture");	
     modelMatrixUniformLocation = glGetUniformLocation(programID, "modelMatrix");
     viewMatrixUniformLocation = glGetUniformLocation(programID, "viewMatrix");
@@ -94,16 +101,23 @@ void wezside::GLSensorViewer::createVBO()
     // For use with Orthogonal projection
     float wwww = (float)screenWidth;
     float hhhh = (float)screenHeight;
+
+    // Note: The problem with this sort of packing is - you can't update
+    // portions of data - the entire vertex array need to be unpacked to the GPU.
+    // A better approach is to use XYWZ XYWZ XYWZ RGBA RGBA RGBA UV UV UV UV 
+    // Currently it is XYWZ RGBA UV XYWZ RGBA UV
 	Vertex vertices[] =
     {
-        {{  0.0f, 0.0f, 0.0f, 1.0f }, { 1.0f, 0.0f, 0.0f, 1.0f }},
-        {{  wwww, 0.0f, 0.0f, 1.0f }, { 0.0f, 1.0f, 0.0f, 1.0f }},
-        {{  0.0f, hhhh, 0.0f, 1.0f }, { 0.0f, 0.0f, 1.0f, 1.0f }},
-        {{  wwww, hhhh, 0.0f, 1.0f }, { 0.0f, 0.0f, 1.0f, 1.0f }}
+    	// XYZW							// RGBA						// UV
+        {{  0.0f, 0.0f, 0.0f, 1.0f }, { 1.0f, 0.0f, 0.0f, 1.0f }, { 1.0f, 0.0f }},
+        {{  wwww, 0.0f, 0.0f, 1.0f }, { 0.0f, 1.0f, 0.0f, 1.0f }, { 0.0f, 0.0f }},
+        {{  0.0f, hhhh, 0.0f, 1.0f }, { 0.0f, 0.0f, 1.0f, 1.0f }, { 1.0f, 1.0f }},
+        {{  wwww, hhhh, 0.0f, 1.0f }, { 0.0f, 0.0f, 1.0f, 1.0f }, { 0.0f, 1.0f }}
     };        
 
     const size_t vertexSize = sizeof(vertices[0]);
     const size_t rgbOffset = sizeof(vertices[0].XYZW);    
+    const size_t texOffset = sizeof(vertices[0].XYZW) + sizeof(vertices[0].RGBA);
 
 	// Create VAO that describes how the vertex attributes are stored in a Vertex Buffer Object 
 	// The VAO is not the actual object storing the vertex data but the descriptor
@@ -123,16 +137,18 @@ void wezside::GLSensorViewer::createVBO()
     // Describe vertex attributes stored in GPU's memory
     glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, vertexSize, 0);
 	glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, vertexSize, (GLvoid*) rgbOffset);
+	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, vertexSize, (GLvoid*) texOffset);
 
 	// Enable the vertex attributes 
 	// 0-Vertices 
 	// 1-Colour
     glEnableVertexAttribArray(0);
     glEnableVertexAttribArray(1);
+    glEnableVertexAttribArray(2);
  	glUtil.exitOnGLError("ERROR: Could not create a VBO");
 
  	// Texture initialise
- 	// glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+ 	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
  	// Generate texture objects
  	glGenTextures(1, &textureID);
@@ -148,6 +164,8 @@ void wezside::GLSensorViewer::createVBO()
  	// Set the filtering mode
  	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
  	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+ 	glUniform1i(samplerLoc, 0);
 }
 
 void wezside::GLSensorViewer::resize(int w, int h)
@@ -161,7 +179,7 @@ void wezside::GLSensorViewer::resize(int w, int h)
         glUtil.createOrthogonalMatrix(
            -1, 100.0, 0.0, (float)w, (float)h, 0.0
         );
-
+   	// glUtil.translateMatrix(&viewMatrix, 0, 0, -2);
     glUseProgram(programID);
     glUniformMatrix4fv(projectionMatrixUniformLocation, 1, GL_FALSE, projectionMatrix.m);
     glUseProgram(0);    
@@ -212,11 +230,19 @@ void wezside::GLSensorViewer::display()
 	glUniformMatrix4fv(viewMatrixUniformLocation, 1, GL_FALSE, viewMatrix.m);
 	glUtil.exitOnGLError("ERROR: Could not set the shader uniforms");
 
+	glEnableVertexAttribArray(0);
+	glEnableVertexAttribArray(1);
+	glEnableVertexAttribArray(2);
 	// Bind the texture
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, textureID);
 	glUniform1i(samplerLoc, 0);
- 	glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, m_nTexMapX, m_nTexMapY, GL_RGB, GL_UNSIGNED_BYTE, m_pTexMap);
+ // 	glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, m_nTexMapX, m_nTexMapY, GL_RGB, GL_UNSIGNED_BYTE, m_pTexMap);
+	// glTexParameteri(GL_TEXTURE_2D, GL_GENERATE_MIPMAP_SGIS, GL_TRUE);
+	// glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+	// glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, m_nTexMapX, m_nTexMapY, 0, GL_RGB, GL_UNSIGNED_BYTE, m_pTexMap);
+	glUtil.exitOnGLError("ERROR: Could not bind the texture");
 
 	glBindVertexArray(vaoID);
 	glUtil.exitOnGLError("ERROR: Could not bind the VAO for drawing purposes");

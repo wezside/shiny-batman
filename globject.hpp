@@ -23,6 +23,7 @@ namespace wezside
             {
                 float XYZW[4];
                 float RGBA[4];
+                float UV[2];
             } Vertex;
             std::string name;
             GLuint
@@ -34,6 +35,7 @@ namespace wezside
                 indexBufferID[2],
             	activeIndexBuffer,
                 samplerLoc,
+                texCoordLoc,
                 projectionMatrixUniformLocation,
                 viewMatrixUniformLocation,
                 modelMatrixUniformLocation;

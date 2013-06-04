@@ -18,8 +18,8 @@ namespace wezside
             void initWindow(int, char*[]);
             // void keyboardFunction( unsigned char, int, int );
 
-            const static int width = 640;
-            const static int height = 480;
+            const static int width = 1024;
+            const static int height = 576;
             static unsigned int frameCount;
             static int windowHandle;
             static GlutApp *m_self;
