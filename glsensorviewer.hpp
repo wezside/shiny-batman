@@ -51,7 +51,8 @@ namespace wezside
                             {};
 			~GLSensorViewer();                         
 			int init(void);
-			void display();
+			void draw();
+            void update();
 			void simpleRead(openni::VideoFrameRef&);
 			void drawColorFrame(openni::VideoFrameRef&);
 			void createVBO();

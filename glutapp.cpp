@@ -168,7 +168,9 @@ void GlutApp::display(void)
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	// Call GLObj display here
-	glo->display();
+	// glo->display();
+	glo->update();
+	glo->draw();
 
 	glutSwapBuffers();
 	glutPostRedisplay();

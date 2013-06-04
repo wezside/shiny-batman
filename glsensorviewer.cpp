@@ -205,7 +205,7 @@ void wezside::GLSensorViewer::resize(int w, int h)
  * values and read values from the sensor. The second tells OpenGL to draw the 
  * Vertex Buffer Objects to screen using the shader programs.
  */
-void wezside::GLSensorViewer::display()
+void wezside::GLSensorViewer::update()
 {
 	int changedIndex;
 	openni::Status rc = openni::OpenNI::waitForAnyStream(m_streams, 2, &changedIndex);
@@ -235,7 +235,10 @@ void wezside::GLSensorViewer::display()
 	modelMatrix = GLUtils::IDENTITY_MATRIX;
 	// glUtil.rotateAboutY(&modelMatrix, glUtil.degreesToRadians(angle));
 	// glUtil.rotateAboutX(&modelMatrix, glUtil.degreesToRadians(angle));
+}
 
+void wezside::GLSensorViewer::draw()
+{
 	// Make the shader program active
 	glUseProgram(programID);
 	glUtil.exitOnGLError("ERROR: Could not use the shader program");	

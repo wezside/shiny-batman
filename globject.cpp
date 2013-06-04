@@ -255,7 +255,7 @@ void GLObject::onKey(unsigned char key, int x, int y)
         default: break;
     }
 }
-void GLObject::display()
+void GLObject::draw()
 {
     // Draw stuff here
     // Make the shader program active
