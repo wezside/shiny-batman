@@ -56,8 +56,8 @@ namespace wezside
                 modelMatrix(GLUtils::IDENTITY_MATRIX),
                 projectionMatrix(GLUtils::IDENTITY_MATRIX),
                 viewMatrix(GLUtils::IDENTITY_MATRIX),
-                screenWidth(640),
-                screenHeight(480),
+                screenWidth(1024),
+                screenHeight(576),
                 vertexShader(
                 "#version 330\n"\
 

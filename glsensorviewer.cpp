@@ -2,14 +2,15 @@
 
 wezside::GLSensorViewer::~GLSensorViewer()
 {
+	printf("%s\n", "wezside::GLSensorViewer::~GLSensorViewer()");
+	delete[] m_streams;
+	delete[] m_pTexMap;
 	m_depthStream.stop();
 	m_colorStream.stop();
 	m_depthStream.destroy();
 	m_colorStream.destroy();
 	m_device.close();
 	openni::OpenNI::shutdown();	
-	delete[] m_streams;
-	delete[] m_pTexMap;
 }
 int wezside::GLSensorViewer::init()
 {
@@ -32,6 +33,18 @@ int wezside::GLSensorViewer::init()
 			m_width = depthWidth;
 			m_height = depthHeight;
 		}
+		else if (depthWidth > colorWidth &&
+				 depthHeight > colorHeight)
+		{
+			m_width = depthWidth;
+			m_height = depthHeight;
+		}
+		else if (depthWidth < colorWidth &&
+				 depthHeight < colorHeight)
+		{
+			m_width = colorWidth;
+			m_height = colorHeight;
+		}		
 		else
 		{
 			printf("Error - expect color and depth to be in same resolution: D: %dx%d, C: %dx%d\n",
@@ -65,6 +78,7 @@ int wezside::GLSensorViewer::init()
 	// Texture map init
 	m_nTexMapX = MIN_CHUNKS_SIZE(m_width, TEXTURE_SIZE);
 	m_nTexMapY = MIN_CHUNKS_SIZE(m_height, TEXTURE_SIZE);
+	printf("%dx%d\n", m_nTexMapX, m_nTexMapY);
 	m_pTexMap = new openni::RGB888Pixel[m_nTexMapX * m_nTexMapY];
 	return openni::STATUS_OK;
 }

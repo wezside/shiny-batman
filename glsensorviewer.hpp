@@ -49,16 +49,16 @@ namespace wezside
                                                           m_pTexMap(NULL),
                                                           angle(0)
                             {};
-            ~GLSensorViewer();                         
-            int init(void);
-            void display();
-            void simpleRead(openni::VideoFrameRef&);
-            void drawColorFrame(openni::VideoFrameRef&);
-            void createVBO();
-            void resize(int, int);
+			~GLSensorViewer();                         
+			int init(void);
+			void display();
+			void simpleRead(openni::VideoFrameRef&);
+			void drawColorFrame(openni::VideoFrameRef&);
+			void createVBO();
+			void resize(int, int);
             
             DisplayModes m_eViewState;
             openni::RGB888Pixel* m_pTexMap;            
     };
 };
-#endif // GLSENSOR_VIEWER_H
+#endif // GLSENSOR_VIEWER_H 

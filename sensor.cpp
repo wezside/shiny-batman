@@ -3,9 +3,18 @@
 
 wezside::Sensor::~Sensor() 
 {
-	openni::OpenNI::shutdown();
+	printf("%s\n", "wezside::Sensor::~Sensor()");
+	clean();
 }
-
+void wezside::Sensor::clean()
+{
+	openni::OpenNI::shutdown();
+	depth.stop();
+	color.stop();
+	depth.destroy();
+	color.destroy();	
+	device.close();
+}
 int wezside::Sensor::init(int argc, char** argv)
 {
 	openni::Status rc = openni::STATUS_OK;
@@ -21,7 +30,7 @@ int wezside::Sensor::init(int argc, char** argv)
 	if (rc != openni::STATUS_OK)
 	{
 		printf("Device open failed:\n%s\n", openni::OpenNI::getExtendedError());
-		openni::OpenNI::shutdown();
+		clean();
 		return 1;
 	}
 
@@ -58,22 +67,38 @@ int wezside::Sensor::init(int argc, char** argv)
 	if (!depth.isValid() || !color.isValid())
 	{
 		printf("No valid streams. Exiting\n");
-		openni::OpenNI::shutdown();
+		clean();
 		return 2;
 	}
 
-	
+	// printAvailSensorInfo(device, openni::SENSOR_COLOR);
+	// printAvailSensorInfo(device, openni::SENSOR_DEPTH);
 
-	// Get current VideoMode
-	openni::VideoMode currentVM = color.getVideoMode();
-	printf("%s\n", "\n=================\nCurrent VideoMode\n=================");
-	printf("FPS %d\n", currentVM.getFps());
-	printf("PixelFormat (%d) %s\n", currentVM.getPixelFormat(),
-								  	getPixelFormatString(
-								  		currentVM.getPixelFormat()).c_str()
-								  	);
-	printf("Resolution X: %d\n", currentVM.getResolutionX());
-	printf("Resolution y: %d\n\n", currentVM.getResolutionY());	
+	// Set the video mode resolution to high
+/*	const openni::SensorInfo* sensorInfo = device.getSensorInfo(openni::SENSOR_COLOR);
+	const openni::Array<openni::VideoMode>& videoModes = sensorInfo->getSupportedVideoModes();	
+	rc = color.setVideoMode(videoModes[2]);
+	if (rc != openni::STATUS_OK)
+	{
+		printf("Couldn't set color video stream mode:\n%s\n", openni::OpenNI::getExtendedError());
+		color.destroy();
+	}	
+
+	// Set depth video mode
+	const openni::SensorInfo* sensorInfoDepth = device.getSensorInfo(openni::SENSOR_DEPTH);
+	const openni::Array<openni::VideoMode>& videoModesDepth = sensorInfoDepth->getSupportedVideoModes();	
+	rc = depth.setVideoMode(videoModesDepth[5]);	
+	if (rc != openni::STATUS_OK)
+	{
+		printf("Couldn't set depth video stream mode:\n%s\n", openni::OpenNI::getExtendedError());
+		depth.destroy();
+	}		*/
+
+	// Current sensor info
+	printSensorInfo(color);
+	printSensorInfo(depth);
+
+	if (rc != openni::STATUS_OK) printf("%s\n", openni::OpenNI::getExtendedError());
 	return rc;
 }
 
@@ -96,20 +121,33 @@ std::string wezside::Sensor::getPixelFormatString(int format)
 	return result;
 }
 
+void wezside::Sensor::printSensorInfo(openni::VideoStream& vs)
+{
+	openni::VideoMode currentVM = vs.getVideoMode();
+	printf("%s\n", "\n=================\nCurrent VideoMode\n=================");
+	printf("FPS %d\n", currentVM.getFps());
+	printf("PixelFormat (%d) %s\n", currentVM.getPixelFormat(),
+								  	getPixelFormatString(
+								  		currentVM.getPixelFormat()).c_str()
+								  	);
+	printf("Resolution X: %d\n", currentVM.getResolutionX());
+	printf("Resolution y: %d\n\n", currentVM.getResolutionY());		
+}
+
 void wezside::Sensor::printAvailSensorInfo(openni::Device& device, openni::SensorType st)
 {
-	printf("%s\n", "Sensor Info\n============\n");
+	printf("%s\n", "Available Sensor Info\n=====================\n");
 	const openni::SensorInfo* sensorInfo = device.getSensorInfo(st);
 	const openni::Array<openni::VideoMode>& videoModes = sensorInfo->getSupportedVideoModes();
 	for (int i = 0; i < videoModes.getSize(); ++i)
 	{
 		const openni::VideoMode vm(videoModes[i]);
-		printf("FPS %d\n", vm.getFps());
-		printf("PixelFormat (%d) %s", vm.getPixelFormat(),
-									  getPixelFormatString(
-									  	vm.getPixelFormat()).c_str()
-									  );
-		printf("Resolution X: %d\n", vm.getResolutionX());
-		printf("Resolution y: %d\n\n", vm.getResolutionY());
+		printf("FPS %d :: ", vm.getFps());
+		printf("PixelFormat (%d) %s\n", vm.getPixelFormat(),
+									  	getPixelFormatString(
+									  		vm.getPixelFormat()).c_str()
+									  	);
+		printf("Resolution X (%d) :: ", vm.getResolutionX());
+		printf("Resolution y (%d)\n\n", vm.getResolutionY());
 	}	
 }
