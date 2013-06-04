@@ -94,7 +94,7 @@ void GlutApp::init( int argc, char** argv, const char* fVertex, const char* fFra
 void GlutApp::initGLStates()
 {
 	glEnable(GL_TEXTURE_2D);
-    // glShadeModel( GL_SMOOTH );
+    glShadeModel(GL_SMOOTH);
     // glEnable(GL_SCISSOR); // Used with Ortho-Projection to clip outside viewport
 }
 

@@ -101,7 +101,8 @@ void wezside::GLSensorViewer::createVBO()
     // For use with Orthogonal projection
     float wwww = (float)screenWidth;
     float hhhh = (float)screenHeight;
-
+    wwww = 1024;
+    hhhh = 576;
     // Note: The problem with this sort of packing is - you can't update
     // portions of data - the entire vertex array need to be unpacked to the GPU.
     // A better approach is to use XYWZ XYWZ XYWZ RGBA RGBA RGBA UV UV UV UV 
@@ -271,6 +272,7 @@ void wezside::GLSensorViewer::drawColorFrame(openni::VideoFrameRef& frame)
 		const openni::RGB888Pixel* pImageRow = (const openni::RGB888Pixel*)frame.getData();
 		openni::RGB888Pixel* pTexRow = m_pTexMap + frame.getCropOriginY() * m_nTexMapX;
 		int rowSize = frame.getStrideInBytes() / sizeof(openni::RGB888Pixel);
+		// printf("%dx%d\n", frame.getWidth(), frame.getHeight());
 		for (int y = 0; y < frame.getHeight(); ++y)
 		{
 			const openni::RGB888Pixel* pImage = pImageRow;

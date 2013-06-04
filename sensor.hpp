@@ -2,7 +2,7 @@
 #define SENSOR3D_H
 
 #include <OpenNI.h>
-#include <string.h>
+#include <string>
 
 namespace wezside 
 {
@@ -16,7 +16,9 @@ namespace wezside
         Sensor(const char* value) : deviceURI(value) {};
         ~Sensor();
 
-        int init(int argc, char** argv);
+        int init(int, char**);
+        std::string getPixelFormatString(int);
+        void printAvailSensorInfo(openni::Device& device, openni::SensorType st);
         
     	openni::Status rc;
     	openni::Device device;

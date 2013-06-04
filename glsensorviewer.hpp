@@ -5,7 +5,7 @@
 #include <OpenNI.h>
 #include "globject.hpp"
 
-#define TEXTURE_SIZE 2
+#define TEXTURE_SIZE 1
 #define DEFAULT_DISPLAY_MODE DISPLAY_MODE_IMAGE
 #define MIN_NUM_CHUNKS(data_size, chunk_size)   ((((data_size)-1) / (chunk_size) + 1))
 #define MIN_CHUNKS_SIZE(data_size, chunk_size)  (MIN_NUM_CHUNKS(data_size, chunk_size) * (chunk_size))
