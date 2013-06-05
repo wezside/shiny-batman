@@ -12,7 +12,7 @@ wezside::GLSensorViewer::~GLSensorViewer()
 	m_colorStream.stop();
 	m_colorStream.destroy();
 	m_device.close();
-	// openni::OpenNI::shutdown();	
+	openni::OpenNI::shutdown();	
 }
 int wezside::GLSensorViewer::init()
 {

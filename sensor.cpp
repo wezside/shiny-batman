@@ -8,12 +8,12 @@ wezside::Sensor::~Sensor()
 }
 void wezside::Sensor::clean()
 {
-	// openni::OpenNI::shutdown();
 	depth.stop();
 	color.stop();
 	depth.destroy();
 	color.destroy();	
 	device.close();
+	openni::OpenNI::shutdown();
 }
 int wezside::Sensor::init(int argc, char** argv)
 {
