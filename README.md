@@ -12,5 +12,5 @@ To do:
 ------
 - ~~Split display into update and draw methods for easier integration with OF~~
 - Create an example GL Object which doesn't initialise in createVBO() but rather in resize()
-	o reason for this is with use of textures to know the screensize
-	o alternatively resize the texture on screen resize
+	- reason for this is with use of textures to know the screensize
+	- alternatively resize the texture on screen resize
