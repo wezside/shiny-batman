@@ -75,9 +75,9 @@ int wezside::Sensor::init(int argc, char** argv)
 	// printAvailSensorInfo(device, openni::SENSOR_DEPTH);
 
 	// Set the video mode resolution to high
-/*	const openni::SensorInfo* sensorInfo = device.getSensorInfo(openni::SENSOR_COLOR);
+	const openni::SensorInfo* sensorInfo = device.getSensorInfo(openni::SENSOR_COLOR);
 	const openni::Array<openni::VideoMode>& videoModes = sensorInfo->getSupportedVideoModes();	
-	rc = color.setVideoMode(videoModes[2]);
+	rc = color.setVideoMode(videoModes[4]);
 	if (rc != openni::STATUS_OK)
 	{
 		printf("Couldn't set color video stream mode:\n%s\n", openni::OpenNI::getExtendedError());
@@ -87,12 +87,12 @@ int wezside::Sensor::init(int argc, char** argv)
 	// Set depth video mode
 	const openni::SensorInfo* sensorInfoDepth = device.getSensorInfo(openni::SENSOR_DEPTH);
 	const openni::Array<openni::VideoMode>& videoModesDepth = sensorInfoDepth->getSupportedVideoModes();	
-	rc = depth.setVideoMode(videoModesDepth[5]);	
+	rc = depth.setVideoMode(videoModesDepth[4]);	
 	if (rc != openni::STATUS_OK)
 	{
 		printf("Couldn't set depth video stream mode:\n%s\n", openni::OpenNI::getExtendedError());
 		depth.destroy();
-	}		*/
+	}		
 
 	// Current sensor info
 	printSensorInfo(color);

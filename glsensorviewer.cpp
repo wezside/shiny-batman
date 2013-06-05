@@ -227,11 +227,10 @@ void wezside::GLSensorViewer::update()
 	}	
 
 	// Read depth frame
-	m_eViewState = DISPLAY_MODE_DEPTH;
 	if (m_depthFrame.isValid()) depthReading = simpleRead(m_depthFrame);
-	m_eViewState = DISPLAY_MODE_IMAGE;
 	if (m_colorFrame.isValid()) drawColorFrame(m_colorFrame);
-	// printf("%f\n", (depthReading/1050.0)*9);
+	if (m_depthFrame.isValid()) drawDepthFrame(m_depthFrame);
+
 	// Draw OpenGL
 	angle += 1.0f;
 	angle = fmod(angle, 360.0);
@@ -307,6 +306,38 @@ void wezside::GLSensorViewer::drawColorFrame(openni::VideoFrameRef& frame)
 	}
 }
 
+void wezside::GLSensorViewer::drawDepthFrame(openni::VideoFrameRef& frame)
+{
+/*	if (m_depthFrame.isValid())
+	{
+		calculateHistogram(m_pDepthHist, MAX_DEPTH, m_depthFrame);
+	}*/
+	if (m_eViewState != DISPLAY_MODE_DEPTH) return;
+	const openni::DepthPixel* pDepthRow = (const openni::DepthPixel*)m_depthFrame.getData();
+	openni::RGB888Pixel* pTexRow = m_pTexMap + m_depthFrame.getCropOriginY() * m_nTexMapX;
+	int rowSize = m_depthFrame.getStrideInBytes() / sizeof(openni::DepthPixel);
+
+	for (int y = 0; y < m_depthFrame.getHeight(); ++y)
+	{
+		const openni::DepthPixel* pDepth = pDepthRow;
+		openni::RGB888Pixel* pTex = pTexRow + m_depthFrame.getCropOriginX();
+
+		for (int x = 0; x < m_depthFrame.getWidth(); ++x, ++pDepth, ++pTex)
+		{
+			if (*pDepth != 0)
+			{
+				// int nHistValue = m_pDepthHist[*pDepth];
+				pTex->r = *pDepth;
+				pTex->g = *pDepth;
+				pTex->b = *pDepth;
+			}
+		}
+
+		pDepthRow += rowSize;
+		pTexRow += m_nTexMapX;
+	}
+}
+
 /** 
  * This method will simply return the center point depth value.
  */
@@ -322,4 +353,39 @@ int wezside::GLSensorViewer::simpleRead(openni::VideoFrameRef& frame)
 	int middleIndex = (frame.getHeight()+1)*frame.getWidth()/2;
 	// printf("[%08llu] %8d\n", (long long)frame.getTimestamp(), pDepth[middleIndex]);	
 	return pDepth[middleIndex];
+}
+
+void wezside::GLSensorViewer::calculateHistogram(float* pHistogram, int histogramSize, const openni::VideoFrameRef& frame)
+{
+	const openni::DepthPixel* pDepth = (const openni::DepthPixel*)frame.getData();
+	// Calculate the accumulative histogram (the yellow display...)
+	memset(pHistogram, 0, histogramSize*sizeof(float));
+	int restOfRow = frame.getStrideInBytes() / sizeof(openni::DepthPixel) - frame.getWidth();
+	int height = frame.getHeight();
+	int width = frame.getWidth();
+
+	unsigned int nNumberOfPoints = 0;
+	for (int y = 0; y < height; ++y)
+	{
+		for (int x = 0; x < width; ++x, ++pDepth)
+		{
+			if (*pDepth != 0)
+			{
+				pHistogram[*pDepth]++;
+				nNumberOfPoints++;
+			}
+		}
+		pDepth += restOfRow;
+	}
+	for (int nIndex=1; nIndex<histogramSize; nIndex++)
+	{
+		pHistogram[nIndex] += pHistogram[nIndex-1];
+	}
+	if (nNumberOfPoints)
+	{
+		for (int nIndex=1; nIndex<histogramSize; nIndex++)
+		{
+			pHistogram[nIndex] = (256 * (1.0f - (pHistogram[nIndex] / nNumberOfPoints)));
+		}
+	}
 }

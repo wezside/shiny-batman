@@ -6,7 +6,8 @@
 #include "globject.hpp"
 
 #define TEXTURE_SIZE 2
-#define DEFAULT_DISPLAY_MODE DISPLAY_MODE_DEPTH
+#define MAX_DEPTH 10000
+#define DEFAULT_DISPLAY_MODE DISPLAY_MODE_IMAGE
 #define MIN_NUM_CHUNKS(data_size, chunk_size)   ((((data_size)-1) / (chunk_size) + 1))
 #define MIN_CHUNKS_SIZE(data_size, chunk_size)  (MIN_NUM_CHUNKS(data_size, chunk_size) * (chunk_size))
 
@@ -36,6 +37,7 @@ namespace wezside
             float angle;
             int depthReading;
             GLuint textureID;
+            float m_pDepthHist[MAX_DEPTH];
 
         public:
             GLSensorViewer(std::string value,
@@ -57,8 +59,10 @@ namespace wezside
             void update();
 			int simpleRead(openni::VideoFrameRef& frame);
 			void drawColorFrame(openni::VideoFrameRef&);
+			void drawDepthFrame(openni::VideoFrameRef& frame);
 			void createVBO();
 			void resize(int, int);
+			void calculateHistogram(float* pHistogram, int histogramSize, const openni::VideoFrameRef& frame);
             
             DisplayModes m_eViewState;
             openni::RGB888Pixel* m_pTexMap;            
