@@ -1,8 +1,6 @@
-This is a scaffold project to build reusable "GLObjects" with which to draw
-OpenGL grahics with.
+This is a scaffold project to build reusable "GLObjects" with which to draw OpenGL grahics with.
 
-Glut is simply used as a container but for work purposes something like OpenFrameworks 
-is better suited as it provides better cross-platform support. 
+Glut is simply used as a container but for work purposes something like OpenFrameworks is better suited as it provides better cross-platform support. 
 
 Features:
 ---------
