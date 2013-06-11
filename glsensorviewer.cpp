@@ -5,13 +5,13 @@ wezside::GLSensorViewer::~GLSensorViewer()
 	printf("%s\n", "wezside::GLSensorViewer::~GLSensorViewer()");
 	delete[] m_streams;
 	delete[] m_pTexMap;
-	m_depthFrame.release();
+/*	m_depthFrame.release();
 	m_colorFrame.release();
 	m_depthStream.stop();
 	m_depthStream.destroy();
 	m_colorStream.stop();
 	m_colorStream.destroy();
-	m_device.close();
+	m_device.close();*/
 	openni::OpenNI::shutdown();	
 }
 int wezside::GLSensorViewer::init()
@@ -94,8 +94,8 @@ void wezside::GLSensorViewer::createVBO()
     glUtil.exitOnGLError("ERROR: Could not set OpenGL depth testing options");
      
     glEnable(GL_CULL_FACE);
-    glCullFace(GL_FRONT);
-    glFrontFace(GL_CCW);
+    glCullFace(GL_BACK);
+    glFrontFace(GL_CW);
     glUtil.exitOnGLError("ERROR: Could not set OpenGL culling options");
 	
 	texCoordLoc = glGetUniformLocation(programID, "in_TexCoord");	
@@ -103,10 +103,9 @@ void wezside::GLSensorViewer::createVBO()
     modelMatrixUniformLocation = glGetUniformLocation(programID, "modelMatrix");
     viewMatrixUniformLocation = glGetUniformLocation(programID, "viewMatrix");
     projectionMatrixUniformLocation = glGetUniformLocation(programID, "projectionMatrix");	
- 
- 	/*
+  	
  	// For use with Perspective projection
- 	Vertex vertices[] =
+/* 	Vertex vertices[] =
     {
         {{ -0.8f,  0.8f, 0.0f, 1.0f }, { 1.0f, 0.0f, 0.0f, 1.0f }},
         {{  0.8f,  0.8f, 0.0f, 1.0f }, { 0.0f, 1.0f, 0.0f, 1.0f }},
@@ -115,8 +114,8 @@ void wezside::GLSensorViewer::createVBO()
     };*/
 
     // For use with Orthogonal projection
-    float wwww = (float)screenWidth;
-    float hhhh = (float)screenHeight;
+    float wwww = (float)m_nTexMapX;
+    float hhhh = (float)m_nTexMapY;
 
     // Note: The problem with this sort of packing is - you can't update
     // portions of data - the entire vertex array need to be unpacked to the GPU.
@@ -126,10 +125,10 @@ void wezside::GLSensorViewer::createVBO()
 	Vertex vertices[] =
 	{
 			// XYZW							// RGBA						// UV
-		{{  0.0f, 0.0f, 0.0f, 1.0f }, { 1.0f, 0.0f, 0.0f, 1.0f }, {  1.0f, 0.0f }},
-		{{  wwww, 0.0f, 0.0f, 1.0f }, { 0.0f, 1.0f, 0.0f, 1.0f }, {  0.0f, 0.0f }},
-		{{  0.0f, hhhh, 0.0f, 1.0f }, { 0.0f, 0.0f, 1.0f, 1.0f }, {  1.0f, 1.0f }},
-		{{  wwww, hhhh, 0.0f, 1.0f }, { 0.0f, 0.0f, 1.0f, 1.0f }, {  0.0f, 1.0f }}
+		{{ 0.0f, hhhh, 0.0f, 1.0f }, { 1.0f, 0.0f, 0.0f, 1.0f }, {  3.0f, 0.0f }},
+		{{ wwww, hhhh, 0.0f, 1.0f }, { 0.0f, 1.0f, 0.0f, 1.0f }, {  0.0f, 0.0f }},
+		{{ 0.0f, 0.0f, 0.0f, 1.0f }, { 0.0f, 0.0f, 1.0f, 1.0f }, {  3.0f, 3.0f }},
+		{{ wwww, 0.0f, 0.0f, 1.0f }, { 0.0f, 0.0f, 1.0f, 1.0f }, {  0.0f, 3.0f }}
 	};        
 
     const size_t vertexSize = sizeof(vertices[0]);
@@ -194,9 +193,19 @@ void wezside::GLSensorViewer::resize(int w, int h)
     // Orthogonal Projeciton
     projectionMatrix =
         glUtil.createOrthogonalMatrix(
-           -1, 100.0, 0.0, (float)w, (float)h, 0.0
+           -1, 100.0, 0.0, (float)w, 0.0, (float)h
         );
-   	// glUtil.translateMatrix(&viewMatrix, 0, 0, -2);
+
+/*	projectionMatrix =
+        glUtil.createProjectionMatrix(
+            60,
+            (float)w / h,
+            1.0f,
+            100.0f
+        );
+    // Move the Eye(Cam) space backwards so we can see all
+    glUtil.translateMatrix(&viewMatrix, 0, 0, -2);*/
+
     glUseProgram(programID);
     glUniformMatrix4fv(projectionMatrixUniformLocation, 1, GL_FALSE, projectionMatrix.m);
     glUseProgram(0);    
@@ -235,8 +244,8 @@ void wezside::GLSensorViewer::update()
 	angle += 1.0f;
 	angle = fmod(angle, 360.0);
 
-	modelMatrix = GLUtils::IDENTITY_MATRIX;
-	// glUtil.rotateAboutY(&modelMatrix, glUtil.degreesToRadians(angle));
+	viewMatrix = GLUtils::IDENTITY_MATRIX;
+	glUtil.rotateAboutY(&viewMatrix, glUtil.degreesToRadians(angle));
 	// glUtil.rotateAboutX(&modelMatrix, glUtil.degreesToRadians(angle));
 }
 

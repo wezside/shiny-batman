@@ -4,15 +4,6 @@
 wezside::Sensor::~Sensor() 
 {
 	printf("%s\n", "wezside::Sensor::~Sensor()");
-	clean();
-}
-void wezside::Sensor::clean()
-{
-	depth.stop();
-	color.stop();
-	depth.destroy();
-	color.destroy();	
-	device.close();
 	openni::OpenNI::shutdown();
 }
 int wezside::Sensor::init(int argc, char** argv)
@@ -30,7 +21,7 @@ int wezside::Sensor::init(int argc, char** argv)
 	if (rc != openni::STATUS_OK)
 	{
 		printf("Device open failed:\n%s\n", openni::OpenNI::getExtendedError());
-		clean();
+		openni::OpenNI::shutdown();	
 		return 1;
 	}
 
@@ -67,7 +58,7 @@ int wezside::Sensor::init(int argc, char** argv)
 	if (!depth.isValid() || !color.isValid())
 	{
 		printf("No valid streams. Exiting\n");
-		clean();
+		openni::OpenNI::shutdown();	
 		return 2;
 	}
 

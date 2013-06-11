@@ -16,7 +16,6 @@ namespace wezside
         Sensor(const char* value) : deviceURI(value) {};
         ~Sensor();
 
-        void clean();
         int init(int, char**);
         std::string getPixelFormatString(int);
         void printSensorInfo(openni::VideoStream& vs);

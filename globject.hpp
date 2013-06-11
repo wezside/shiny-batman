@@ -33,7 +33,7 @@ namespace wezside
                 vaoID,
                 bufferID,
                 indexBufferID[2],
-            	activeIndexBuffer,
+                activeIndexBuffer,
                 samplerLoc,
                 texCoordLoc,
                 projectionMatrixUniformLocation,
@@ -51,13 +51,11 @@ namespace wezside
 
         public:
             GLObject(std::string value = "default") : 
-                activeIndexBuffer(0), 
                 name(value), 
+                activeIndexBuffer(0), 
                 modelMatrix(GLUtils::IDENTITY_MATRIX),
                 projectionMatrix(GLUtils::IDENTITY_MATRIX),
                 viewMatrix(GLUtils::IDENTITY_MATRIX),
-                screenWidth(1024),
-                screenHeight(576),
                 vertexShader(
                 "#version 330\n"\
 
@@ -81,8 +79,9 @@ namespace wezside
                 "void main(void)\n"\
                 "{\n"\
                 "   out_Color = ex_Color;\n"\
-                "}\n"                
-                    ){};
+                "}\n"),
+                screenWidth(1024),
+                screenHeight(576){};
             ~GLObject()
             {
                 destroyVBO();
