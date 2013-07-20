@@ -46,7 +46,7 @@ namespace wezside
 			float bottom,
 			float top
 		);
-		void exitOnGLError(const char* error_message);
+		int exitOnGLError(const char* error_message);
 
 	};
 };

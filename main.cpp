@@ -13,23 +13,23 @@ using namespace wezside;
 
 int main(int argc, char **argv)
 {
-    // Set up new 3D Sensor
-    Sensor sensor;
-    int rc = sensor.init(argc, argv);
-    if (rc != openni::STATUS_OK)
-    {
-        return EXIT_FAILURE;
-    }
+	// Set up new 3D Sensor
+	Sensor sensor;
+	int rc = sensor.init(argc, argv);
+	if (rc != openni::STATUS_OK)
+	{
+		return EXIT_FAILURE;
+	}
 
-    // Set up new GL Object
-    GLSensorViewer glo("Viewer", sensor.device, sensor.depth, sensor.color);
-    glo.init();
-    
-    // Set up Glut Application 
-    GlutApp app;
-    app.glo = (GLObject*)&glo;
-    app.init(argc, argv, "shader.vert.glsl", "shader.frag.glsl"); 
-    app.render();
+	// Set up new GL Object
+	GLSensorViewer glo("Viewer", sensor.device, sensor.depth, sensor.color);
+	glo.init();
+	
+	// Set up Glut Application 
+	GlutApp app;
+	app.glo = (GLObject*)&glo;
+	app.init(argc, argv, "shader.vert.glsl", "shader.frag.glsl"); 
+	app.render();
 
 	return EXIT_SUCCESS;
 }

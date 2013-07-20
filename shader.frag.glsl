@@ -9,4 +9,5 @@ uniform sampler2D s_texture;
 void main(void)
 {
 	out_Color = texture2D(s_texture, v_uv.xy);
+	//out_Color.rgb = ex_Color.rgb;
 }

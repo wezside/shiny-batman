@@ -15,8 +15,6 @@ namespace wezside
     class GLObject
     {
         private:
-            GLObject(const GLObject&);
-            GLObject& operator=(GLObject&);         
 
         protected:
             typedef struct
@@ -25,13 +23,11 @@ namespace wezside
                 float RGBA[4];
                 float UV[2];
             } Vertex;
-            std::string name;
+            std::string m_name;
             GLuint
-                vertexShaderId,
-                fragmentShaderId,
-                programID,
                 vaoID,
                 bufferID,
+                programID,
                 indexBufferID[2],
                 activeIndexBuffer,
                 samplerLoc,
@@ -44,64 +40,48 @@ namespace wezside
                             projectionMatrix,
                             viewMatrix;
 
-            const GLchar* vertexShader;
-            const GLchar* fragmentShader;
+
             GLUtils glUtil;
             int screenWidth, screenHeight;
+            unsigned int currentFPS;
+            bool m_isVBOCreated;
 
         public:
-            GLObject(std::string value = "default") : 
-                name(value), 
+				GLObject(const GLObject& glo) {};
+				GLObject& operator=(GLObject&) {};          
+				GLObject(std::string value = "default") : 
+                m_name(value),
                 activeIndexBuffer(0), 
                 modelMatrix(GLUtils::IDENTITY_MATRIX),
                 projectionMatrix(GLUtils::IDENTITY_MATRIX),
                 viewMatrix(GLUtils::IDENTITY_MATRIX),
-                vertexShader(
-                "#version 330\n"\
-
-                "layout(location=0) in vec4 in_Position;\n"\
-                "layout(location=1) in vec4 in_Color;\n"\
-                "out vec4 ex_Color;\n"\
-                "uniform mat4 modelMatrix;\n"\
-                "uniform mat4 viewMatrix;\n"\
-                "uniform mat4 projectionMatrix;\n"\
-                "void main(void)\n"\
-                "{\n"\
-                "   gl_Position = (projectionMatrix * viewMatrix * modelMatrix) * in_Position;\n"\
-                "   ex_Color = in_Color;\n"\
-                "}\n"),
-                fragmentShader(
-                "#version 330\n"\
-
-                "in vec4 ex_Color;\n"\
-                "out vec4 out_Color;\n"\
-
-                "void main(void)\n"\
-                "{\n"\
-                "   out_Color = ex_Color;\n"\
-                "}\n"),
                 screenWidth(1024),
-                screenHeight(576){};
-            ~GLObject()
-            {
-                destroyVBO();
-                destroyShaders();
-            }
-            virtual void createShader(const GLchar*, GLenum);
+                screenHeight(576),
+                m_isVBOCreated(0),
+                programID(0){};
+            virtual ~GLObject(){}
             virtual std::string getName();
             virtual void draw();
             virtual void update(){};
             virtual void createVBO();
             virtual void destroyVBO();
-            virtual void destroyShaders(void);
-            virtual void loadShader(void);
-            virtual void loadShader(const char*, GLenum);
-            virtual void glslProgram();
+            virtual int start(){};
+
+            virtual void updateScreen(int, int);
             virtual void resize(int, int);
             virtual void onKey(unsigned char, int, int);
-
+            virtual void setFPS(unsigned int);
+            virtual void setProgramID(GLuint i) 
+            {
+                programID = i;
+            };
+            virtual GLuint getProgramID() 
+            {
+                return programID;
+            }
             virtual GLuint getActiveIndexBuffer(void);
             virtual void setActiveIndexBuffer(GLuint);
+            virtual bool isVBOCreated() { return m_isVBOCreated;}
     };
 };
 #endif // GLOBJECT_H
