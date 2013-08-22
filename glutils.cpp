@@ -124,20 +124,20 @@ wezside::GLUtils::Matrix wezside::GLUtils::createOrthogonalMatrix(
 	)
 {
 	float a = 2.0f / (right - left);
-	float b = 2.0f / (top - bottom);
-	float c = -2.0f / (far - near);
+    float b = 2.0f / (top - bottom);
+    float c = -2.0f / (far - near);
 
-	float tx = - (right + left)/(right - left);
-	float ty = - (top + bottom)/(top - bottom);
-	float tz = - (far + near)/(far - near);
+    float tx = - (right + left)/(right - left);
+    float ty = - (top + bottom)/(top - bottom);
+    float tz = - (far + near)/(far - near);
 
-	Matrix out = {{
+    Matrix out = {{
 		a, 0, 0, 0,
 		0, b, 0, 0,
 		0, 0, c, 0,
 		tx, ty, tz, 1
-	}};
-	return out;
+    }};
+    return out;
 }
 int wezside::GLUtils::exitOnGLError(const char* error_message)
 {

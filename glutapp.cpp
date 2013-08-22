@@ -142,7 +142,7 @@ void GlutApp::initWindow( int argc, char* argv[] )
 			stderr,
 			"ERROR: Could not create a new rendering window.\n"
 		);
-		exit( EXIT_FAILURE );
+		exit(EXIT_FAILURE);
 	}
 	glutReshapeFunc(glutResize);
 	glutDisplayFunc(glutDisplay);
@@ -172,7 +172,7 @@ void GlutApp::onKey(unsigned char key, int x, int y)
     for (tbb::concurrent_vector<GLObject*>::iterator it = v.begin() ; it != v.end(); ++it)
 		(*it)->onKey(key, x, y);
 
-	switch ( key )
+	switch (key)
 	{
 		case 'W':
 		case 'w': glPolygonMode(GL_FRONT_AND_BACK, GL_LINE); break;
@@ -180,6 +180,7 @@ void GlutApp::onKey(unsigned char key, int x, int y)
 		case 's': glPolygonMode(GL_FRONT_AND_BACK, GL_FILL); break;		
 		case 'f': 
 		case 'F': glutFullScreenToggle(); break;
+		case 27 : glutDestroyWindow(windowHandle); break;
 		default: break;
 	}
 }
@@ -239,13 +240,22 @@ GLuint GlutApp::glslProgram()
 	programID = glCreateProgram();
 
 	glAttachShader(programID, vertexShaderId);  
+	glUtil.exitOnGLError("ERROR: Could not attach Vertex Shader");
 	glAttachShader(programID, fragmentShaderId);    
+	glUtil.exitOnGLError("ERROR: Could not attach Fragment Shader");
 	glLinkProgram(programID);
+	glUtil.exitOnGLError("ERROR: Could not link shader program");
 	glUseProgram(programID);
+	glUtil.exitOnGLError("ERROR: Could not use shader program");
 
 	glGetIntegerv(GL_CURRENT_PROGRAM, &tmp);
 	std::cout << "GlutApp::Current GLSLS Program " << programID << std::endl;    
-	glUtil.exitOnGLError("ERROR: Could not create the GLSL program");
+
+/*	for (tbb::concurrent_vector<GLObject*>::iterator it = v.begin(); it != v.end(); ++it)
+	{
+		(*it)->setProgramID(programID);
+		(*it)->createVBO();
+	}*/
 	return programID;
 }
 void GlutApp::destroyShaders()

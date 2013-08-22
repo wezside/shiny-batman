@@ -16,6 +16,8 @@ namespace wezside
     {
         private:
 
+    
+
         protected:
             typedef struct
             {
@@ -32,6 +34,7 @@ namespace wezside
                 activeIndexBuffer,
                 samplerLoc,
                 texCoordLoc,
+                lerpLoc,
                 projectionMatrixUniformLocation,
                 viewMatrixUniformLocation,
                 modelMatrixUniformLocation;

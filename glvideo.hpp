@@ -13,12 +13,20 @@
 #define MIN_NUM_CHUNKS(data_size, chunk_size)   (((data_size)-1) / (chunk_size) + 1)
 #define MIN_CHUNKS_SIZE(data_size, chunk_size)  (MIN_NUM_CHUNKS(data_size, chunk_size) * (chunk_size))
 
+#define easeOut(t, b, c, d) -c *(t/=d)*(t-2) + b
+
 namespace wezside
 {
 	class GLVideo : public GLObject
 	{
 		private:
-			GLuint textureID;	
+			GLuint textureID,
+				   left_boundary_loc,
+				   right_boundary_loc,
+				   top_boundary_loc,
+				   bottom_boundary_loc;	
+
+			GLUtils::Matrix m_scaleMatrix;				   
 			std::vector<cv::Mat> m_frames;
 
 			int m_currentFrame;
@@ -38,7 +46,10 @@ namespace wezside
 			float m_height;
 			float m_quality;
 			float m_fCropFill;
-			float m_nOffsetX, m_nOffsetY;
+			float m_fLerp, m_fScaleX, m_fScaleY, m_fXPos, m_fYPos, m_fZPos;
+			float m_fTime, m_fStart, m_fChange, m_fDuration;
+			float m_fPosTime, m_fPosStart, m_fPosChange, m_fPosDuration;
+			float m_nOffsetX, m_nOffsetY, m_wwww, m_hhhh;
 
 			bool m_grab;
 			bool m_autoplay;
@@ -76,6 +87,16 @@ namespace wezside
 								    m_rows(rows),
 									m_playcount(0),
 									m_fCropFill(0.0f),
+									m_fXPos(0.0f),
+									m_fYPos(0.0f),
+									m_fZPos(0.0f),
+									m_fScaleX(1.0f),
+									m_fScaleY(1.0f),
+									m_fLerp(0.0f),
+									m_fStart(1.0f),
+									m_fChange(1.0f),
+									m_fDuration(1.0f),
+									m_fPosTime(0.0f), m_fPosStart(0.0f), m_fPosChange(0.0f), m_fPosDuration(1.0f),
 									m_nOffsetX(0.0f),
 									m_nOffsetY(0.0f),
 									m_currentFrame(0),
@@ -88,6 +109,9 @@ namespace wezside
 									m_autoplay(0),
 									m_bAutosize(1),
 									m_name(video_fname),
+									m_wwww(0.0f),
+									m_hhhh(0.0f),
+									m_scaleMatrix(GLUtils::IDENTITY_MATRIX),							
 									thr(NULL)
 			{ 
 				printf("[%s] %s %d:%d\n", m_name.c_str(), "GLVideo()", m_cols, m_rows);
