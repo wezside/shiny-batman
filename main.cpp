@@ -8,6 +8,7 @@
 #include "glutapp.hpp"
 #include "sensor.hpp"
 #include "signalhandler.hpp"
+#include "glparticlesystem.hpp"
  
 #ifdef WITH_SENSOR
 	#include "glsensorviewer.hpp"
@@ -30,13 +31,16 @@ int main(int argc, char **argv)
 	GLSensorViewer glo("Viewer", sensor.device, sensor.depth, sensor.color);
 	glo.init();
 #else
-	GLObject glo;
+	// GLParticleSystem glo;
 #endif
 
 	// Set up Glut Application 
 	GlutApp app;
-	app.v.push_back(&glo);
 	app.init(argc, argv); 
+	app.loadShader("particle.vert.glsl", GL_VERTEX_SHADER);
+    app.loadShader("particle.frag.glsl", GL_FRAGMENT_SHADER);
+	app.glslProgram();
+	app.v.push_back(new GLParticleSystem());
 
 	// Register signal handler to handle kill signal
 	SignalHandler signalHandler;

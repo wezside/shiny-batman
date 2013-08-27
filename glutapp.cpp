@@ -14,6 +14,7 @@ GlutApp::GlutApp(int width, int height)
 {
 	m_width = width;
 	m_height = height;
+	m_constantFPS = 0;
 	m_manualLoop = 1;
 	m_bAutoFullscreen = 0;
     GlutApp::m_self = this;
@@ -44,7 +45,7 @@ GlutApp::~GlutApp()
 	destroyShaders();
 	for (tbb::concurrent_vector<GLObject*>::iterator it = v.begin(); it != v.end(); ++it)
 	{
-		printf("~GLVideo Mem Addr::%p\n", *it);
+		printf("~GLObject Mem Addr::%p\n", *it);
 		delete *it;
 		*it = NULL;
 	}
@@ -307,11 +308,14 @@ void GlutApp::display(void)
 	}
 
 	// Constant FPS
-	previousTime = currentTime;
-	int timeInterval = currentTime - previousTime;
-    if (timeInterval < 30)
-    	usleep(30*1000 - timeInterval);
-    currentTime = glutGet(GLUT_ELAPSED_TIME);
+	if (m_constantFPS)
+	{
+		previousTime = currentTime;
+		int timeInterval = currentTime - previousTime;
+		if (timeInterval < 30)
+			usleep(30*1000 - timeInterval);
+		currentTime = glutGet(GLUT_ELAPSED_TIME);
+	}
 
 	glutSwapBuffers();
 	glutPostRedisplay();

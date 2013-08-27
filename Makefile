@@ -30,13 +30,16 @@ LDLIBS += -lopencv_videostab
 
 all: app
 
+sensor: CXX += -DWITH_SENSOR -DDEBUG -ggdb 
+sensor: app
+
 debug: CXX += -DDEBUG -ggdb 
 debug: app
 
 default: app
 
-app: glutapp.o globject.o sensor.o glsensorviewer.o glutils.o signalhandler.o main.o 
-	$(CC) $(CPPFLAGS) $(CFLAGS) -o app glutapp.o globject.o sensor.o glsensorviewer.o glutils.o signalhandler.o main.o $(LDLIBS) 
+app: glutapp.o globject.o sensor.o glsensorviewer.o glutils.o signalhandler.o glparticlesystem.o main.o 
+	$(CC) $(CPPFLAGS) $(CFLAGS) -o app glutapp.o globject.o sensor.o glsensorviewer.o glutils.o signalhandler.o glparticlesystem.o main.o $(LDLIBS) 
 
 clean: 
 	$(RM) count *.o *~

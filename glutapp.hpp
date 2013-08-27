@@ -36,6 +36,7 @@ namespace wezside
             static GlutApp *m_self;
             bool m_manualLoop;
             bool m_bAutoFullscreen;
+            bool m_constantFPS;
             
         protected:            
             GLuint

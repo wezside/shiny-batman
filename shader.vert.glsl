@@ -7,8 +7,6 @@ layout(location=2) in vec2 in_TexCoord;
 out vec4 ex_Color;
 out vec2 v_uv;
 
-//unifrom int gridPosition;
-//uniform float lerp = 0.0;
 uniform mat4 modelMatrix;
 uniform mat4 viewMatrix;
 uniform mat4 projectionMatrix;
