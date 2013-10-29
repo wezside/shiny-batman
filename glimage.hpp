@@ -8,7 +8,7 @@
 
 namespace wezside
 {
-	class GLParticleSystem : public GLObject
+	class GLImage : public GLObject
 	{
 		private:
 			float m_time;
@@ -42,27 +42,24 @@ namespace wezside
 
 		public:
 			// Default constructor
-			GLParticleSystem(GLuint pid = 0) : 
-				m_time(0.0f),
-				m_nTexMapX(4),
-				m_nTexMapY(4),	
-				waveTime(0.0),
-				waveWidth(0.1),
-				waveHeight(0.5),
-				waveFreq(0.001)
-				{
-					programID = pid;
-				};
+			GLImage() : m_time(0.0f),
+								 m_nTexMapX(4),
+								 m_nTexMapY(4),
+								 waveTime(0.0),
+								 waveWidth(0.1),
+								 waveHeight(0.5),
+								 waveFreq(0.001)
+								 {};
 
 			
 			// Copy constructor
-			GLParticleSystem(const GLParticleSystem& glo) {};
+			GLImage(const GLImage& glo) {};
 
 			// Copy Assignment operator
-			GLParticleSystem& operator=(GLParticleSystem&) {};
+			GLImage& operator=(GLImage&) {};
 
 			// Destructor
-			~GLParticleSystem() {};
+			~GLImage() {};
 
 			void createVBO();
 			void destroyVBO();

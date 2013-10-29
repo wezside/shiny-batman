@@ -37,10 +37,16 @@ int main(int argc, char **argv)
 	// Set up Glut Application 
 	GlutApp app;
 	app.init(argc, argv); 
-	app.loadShader("particle.vert.glsl", GL_VERTEX_SHADER);
+	app.loadShader("strange.vert.glsl", GL_VERTEX_SHADER);
     app.loadShader("particle.frag.glsl", GL_FRAGMENT_SHADER);
-	app.glslProgram();
-	app.v.push_back(new GLParticleSystem());
+	GLuint pid = app.glslProgram();
+	app.v.push_back(new GLParticleSystem(pid));
+
+	// Navier Stokes
+	// get_from_UI ( dens_prev, u_prev, v_prev );
+	// vel_step ( N, u, v, u_prev, v_prev, visc, dt );
+	// dens_step ( N, dens, dens_prev, u, v, diff, dt );
+	// draw_dens ( N, dens );
 
 	// Register signal handler to handle kill signal
 	SignalHandler signalHandler;

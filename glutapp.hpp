@@ -66,6 +66,7 @@ namespace wezside
             virtual void idle();
             virtual void timer(int);
             virtual void onKey(unsigned char, int, int);
+            virtual void onMouse(int button, int state, int x, int y);
             virtual void cleanup();
             virtual void loadShader(void);
             virtual void loadShader(const char*, GLenum);
@@ -86,6 +87,7 @@ namespace wezside
             static void glutTimer(int);
             static void glutIdle(void);
             static void glutKeyboard(unsigned char key, int x, int y);
+            static void glutMouse(int button, int state, int x, int y);
             static void glutCleanup(void);
 
     };

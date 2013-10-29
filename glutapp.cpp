@@ -55,6 +55,10 @@ void GlutApp::glutKeyboard(unsigned char key, int x, int y)
 {
 	GlutApp::m_self->onKey(key, x, y);
 }
+void GlutApp::glutMouse(int button, int state, int x, int y)
+{
+	GlutApp::m_self->onMouse(button, state, x, y);	
+}
 void GlutApp::glutResize(int w, int h)
 {
 	GlutApp::m_self->resize(w, h);
@@ -150,12 +154,12 @@ void GlutApp::initWindow( int argc, char* argv[] )
 	glutIdleFunc(glutIdle);
     glutTimerFunc(0, glutTimer, 0);
 	glutKeyboardFunc(glutKeyboard);
+	glutMouseFunc(glutMouse);
     glutCloseFunc(glutCleanup);
 
 	if (m_bAutoFullscreen == 1) glutFullScreenToggle();
 	// glViewport(0, 0, m_width, m_height);
-/*	glutMouseFunc(mouseWrapper);
-	glutMotionFunc(motionWrapper);
+/*	glutMotionFunc(motionWrapper);
 	glutPassiveMotionFunc(passiveMotionWrapper);
 	glutMouseWheelFunc(mouseWheelWrapper) ;
 
@@ -173,6 +177,9 @@ void GlutApp::onKey(unsigned char key, int x, int y)
     for (tbb::concurrent_vector<GLObject*>::iterator it = v.begin() ; it != v.end(); ++it)
 		(*it)->onKey(key, x, y);
 
+	GLfloat colors[][3] = {{0.0f, 0.0f, 1.0f}, {0.0f, 0.0f, 0.0f }};
+    static int back;
+
 	switch (key)
 	{
 		case 'W':
@@ -182,8 +189,19 @@ void GlutApp::onKey(unsigned char key, int x, int y)
 		case 'f': 
 		case 'F': glutFullScreenToggle(); break;
 		case 27 : glutDestroyWindow(windowHandle); break;
-		default: break;
+		default: 
+			back ^= 1;
+		 	glClearColor(colors[back][0], colors[back][1], colors[back][2], 1.0f);
+		 	glutPostRedisplay();
+			break;
 	}
+}
+void GlutApp::onMouse(int button, int state, int x, int y)
+{
+	if (button == GLUT_LEFT_BUTTON)
+    {
+    	
+    }	
 }
 void GlutApp::loadShader()
 {
@@ -299,7 +317,7 @@ void GlutApp::display(void)
 		if (!(*it)->isVBOCreated())
 		{
 			(*it)->updateScreen(m_width, m_height);
-			(*it)->setProgramID(programID);
+			if ((*it)->getProgramID() == 0) (*it)->setProgramID(programID);
 			(*it)->createVBO();				
 		}
 		(*it)->setFPS(frameCount);
