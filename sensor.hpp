@@ -3,6 +3,7 @@
 
 #include <OpenNI.h>
 #include <string>
+#include "NiTE.h"
 
 namespace wezside 
 {
@@ -21,8 +22,8 @@ namespace wezside
         void printSensorInfo(openni::VideoStream& vs);
         void printAvailSensorInfo(openni::Device& device, openni::SensorType st);
         
-    	openni::Status rc;
-    	openni::Device device;
+        openni::Status rc;
+        openni::Device device;
         openni::VideoStream depth, color;
     };
 };

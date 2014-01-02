@@ -89,39 +89,39 @@ void wezside::GLSensorViewer::createVBO()
 {
 	std::cout << "GLSensorViewer::createVBO" << std::endl;
 
-    glEnable(GL_DEPTH_TEST);
-    glDepthFunc(GL_LESS);
-    glUtil.exitOnGLError("ERROR: Could not set OpenGL depth testing options");
-     
-    glEnable(GL_CULL_FACE);
-    glCullFace(GL_BACK);
-    glFrontFace(GL_CW);
-    glUtil.exitOnGLError("ERROR: Could not set OpenGL culling options");
+	// glEnable(GL_DEPTH_TEST);
+	// glDepthFunc(GL_LESS);
+	// glUtil.exitOnGLError("ERROR: Could not set OpenGL depth testing options");
+	 
+	glEnable(GL_CULL_FACE);
+	glCullFace(GL_BACK);
+	glFrontFace(GL_CW);
+	glUtil.exitOnGLError("ERROR: Could not set OpenGL culling options");
 	
 	texCoordLoc = glGetUniformLocation(programID, "in_TexCoord");	
 	samplerLoc = glGetUniformLocation(programID, "s_texture");	
-    modelMatrixUniformLocation = glGetUniformLocation(programID, "modelMatrix");
-    viewMatrixUniformLocation = glGetUniformLocation(programID, "viewMatrix");
-    projectionMatrixUniformLocation = glGetUniformLocation(programID, "projectionMatrix");	
-  	
- 	// For use with Perspective projection
+	modelMatrixUniformLocation = glGetUniformLocation(programID, "modelMatrix");
+	viewMatrixUniformLocation = glGetUniformLocation(programID, "viewMatrix");
+	projectionMatrixUniformLocation = glGetUniformLocation(programID, "projectionMatrix");	
+	
+	// For use with Perspective projection
 /* 	Vertex vertices[] =
-    {
-        {{ -0.8f,  0.8f, 0.0f, 1.0f }, { 1.0f, 0.0f, 0.0f, 1.0f }},
-        {{  0.8f,  0.8f, 0.0f, 1.0f }, { 0.0f, 1.0f, 0.0f, 1.0f }},
-        {{ -0.8f, -0.8f, 0.0f, 1.0f }, { 0.0f, 0.0f, 1.0f, 1.0f }},
-        {{  0.8f, -0.8f, 0.0f, 1.0f }, { 0.0f, 0.0f, 1.0f, 1.0f }}
-    };*/
+	{
+		{{ -0.8f,  0.8f, 0.0f, 1.0f }, { 1.0f, 0.0f, 0.0f, 1.0f }},
+		{{  0.8f,  0.8f, 0.0f, 1.0f }, { 0.0f, 1.0f, 0.0f, 1.0f }},
+		{{ -0.8f, -0.8f, 0.0f, 1.0f }, { 0.0f, 0.0f, 1.0f, 1.0f }},
+		{{  0.8f, -0.8f, 0.0f, 1.0f }, { 0.0f, 0.0f, 1.0f, 1.0f }}
+	};*/
 
-    // For use with Orthogonal projection
-    float wwww = (float)m_nTexMapX;
-    float hhhh = (float)m_nTexMapY;
+	// For use with Orthogonal projection
+	float wwww = (float)m_nTexMapX;
+	float hhhh = (float)m_nTexMapY;
 
-    // Note: The problem with this sort of packing is - you can't update
-    // portions of data - the entire vertex array need to be unpacked to the GPU.
-    // A better approach is to use XYWZ XYWZ XYWZ RGBA RGBA RGBA UV UV UV UV 
-    // Currently it is XYWZ RGBA UV XYWZ RGBA UV. The former means we can use 
-    // glBufferSubData to only update a sub section.
+	// Note: The problem with this sort of packing is - you can't update
+	// portions of data - the entire vertex array need to be unpacked to the GPU.
+	// A better approach is to use XYWZ XYWZ XYWZ RGBA RGBA RGBA UV UV UV UV 
+	// Currently it is XYWZ RGBA UV XYWZ RGBA UV. The former means we can use 
+	// glBufferSubData to only update a sub section.
 	Vertex vertices[] =
 	{
 			// XYZW							// RGBA						// UV
@@ -131,84 +131,84 @@ void wezside::GLSensorViewer::createVBO()
 		{{ wwww, 0.0f, 0.0f, 1.0f }, { 0.0f, 0.0f, 1.0f, 1.0f }, {  0.0f, 3.0f }}
 	};        
 
-    const size_t vertexSize = sizeof(vertices[0]);
-    const size_t rgbOffset = sizeof(vertices[0].XYZW);    
-    const size_t texOffset = sizeof(vertices[0].XYZW) + sizeof(vertices[0].RGBA);
+	const size_t vertexSize = sizeof(vertices[0]);
+	const size_t rgbOffset = sizeof(vertices[0].XYZW);    
+	const size_t texOffset = sizeof(vertices[0].XYZW) + sizeof(vertices[0].RGBA);
 
 	// Create VAO that describes how the vertex attributes are stored in a Vertex Buffer Object 
 	// The VAO is not the actual object storing the vertex data but the descriptor
-    glGenVertexArrays(1, &vaoID);
-    glBindVertexArray(vaoID);
+	glGenVertexArrays(1, &vaoID);
+	glBindVertexArray(vaoID);
 
-    // Generate a valid ID used for storage and bind to this new ID so data 
-    // can be copied to GPU's memory
-    glGenBuffers(1, &bufferID);
-    glBindBuffer(GL_ARRAY_BUFFER, bufferID);
+	// Generate a valid ID used for storage and bind to this new ID so data 
+	// can be copied to GPU's memory
+	glGenBuffers(1, &bufferID);
+	glBindBuffer(GL_ARRAY_BUFFER, bufferID);
 
-    // Reserve appropriate data storage on the GPU for our vertices
-    // Passsing NULL as "data" param will indicate that the reserved data store 
-    // is uninitialized
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+	// Reserve appropriate data storage on the GPU for our vertices
+	// Passsing NULL as "data" param will indicate that the reserved data store 
+	// is uninitialized
+	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
-    // Describe vertex attributes stored in GPU's memory
-    glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, vertexSize, 0);
+	// Describe vertex attributes stored in GPU's memory
+	glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, vertexSize, 0);
 	glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, vertexSize, (GLvoid*) rgbOffset);
 	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, vertexSize, (GLvoid*) texOffset);
 
 	// Enable the vertex attributes 
 	// 0-Vertices 
 	// 1-Colour
-    glEnableVertexAttribArray(0);
-    glEnableVertexAttribArray(1);
-    glEnableVertexAttribArray(2);
- 	glUtil.exitOnGLError("ERROR: Could not create a VBO");
-
- 	// Texture initialise
- 	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-
- 	// Generate texture objects
- 	glGenTextures(1, &textureID);
-
- 	// Bind the texture object
- 	glActiveTexture(GL_TEXTURE0);
- 	glBindTexture(GL_TEXTURE_2D, textureID);
-
- 	// Load the texture
- 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, m_nTexMapX, m_nTexMapY, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+	glEnableVertexAttribArray(0);
+	glEnableVertexAttribArray(1);
+	glEnableVertexAttribArray(2);
 	glUtil.exitOnGLError("ERROR: Could not create a VBO");
 
- 	// Set the filtering mode
- 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
- 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	// Texture initialise
+	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
- 	glUniform1i(samplerLoc, 0);
+	// Generate texture objects
+	glGenTextures(1, &textureID);
+
+	// Bind the texture object
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, textureID);
+
+	// Load the texture
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, m_nTexMapX, m_nTexMapY, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+	glUtil.exitOnGLError("ERROR: Could not create a VBO");
+
+	// Set the filtering mode
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+	glUniform1i(samplerLoc, 0);
 }
 
 void wezside::GLSensorViewer::resize(int w, int h)
 {
-    screenWidth = w;
-    screenHeight = h;
-    printf("GLObject::resize(%d,%d)\n", w, h);
+	screenWidth = w;
+	screenHeight = h;
+	printf("GLObject::resize(%d,%d)\n", w, h);
 
-    // Orthogonal Projeciton
-    projectionMatrix =
-        glUtil.createOrthogonalMatrix(
-           -1, 100.0, 0.0, (float)w, 0.0, (float)h
-        );
+	// Orthogonal Projeciton
+	projectionMatrix =
+		glUtil.createOrthogonalMatrix(
+		   -1, 100.0, 0.0, (float)w, 0.0, (float)h
+		);
 
 /*	projectionMatrix =
-        glUtil.createProjectionMatrix(
-            60,
-            (float)w / h,
-            1.0f,
-            100.0f
-        );
-    // Move the Eye(Cam) space backwards so we can see all
-    glUtil.translateMatrix(&viewMatrix, 0, 0, -2);*/
+		glUtil.createProjectionMatrix(
+			60,
+			(float)w / h,
+			1.0f,
+			100.0f
+		);
+	// Move the Eye(Cam) space backwards so we can see all
+	glUtil.translateMatrix(&viewMatrix, 0, 0, -2);*/
 
-    glUseProgram(programID);
-    glUniformMatrix4fv(projectionMatrixUniformLocation, 1, GL_FALSE, projectionMatrix.m);
-    glUseProgram(0);    
+	glUseProgram(programID);
+	glUniformMatrix4fv(projectionMatrixUniformLocation, 1, GL_FALSE, projectionMatrix.m);
+	glUseProgram(0);    
 }
 
 /**
