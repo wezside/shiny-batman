@@ -13,7 +13,6 @@ uniform mat4 projectionMatrix;
 
 void main(void)
 {
-	//vec4 vScaled = mix(in_Position, final_Position, lerp);
 	gl_Position = (projectionMatrix * viewMatrix * modelMatrix) * in_Position;
 	ex_Color = in_Color;
 	v_uv = in_TexCoord;

@@ -14,7 +14,6 @@ GlutApp::GlutApp(int width, int height)
 {
 	m_width = width;
 	m_height = height;
-	m_constantFPS = 0;
 	m_manualLoop = 1;
 	m_bAutoFullscreen = 0;
     GlutApp::m_self = this;
@@ -46,7 +45,7 @@ GlutApp::~GlutApp()
 	for (tbb::concurrent_vector<GLObject*>::iterator it = v.begin(); it != v.end(); ++it)
 	{
 		printf("~GLObject Mem Addr::%p\n", *it);
-		delete *it;
+		if (!(*it)) delete *it;
 		*it = NULL;
 	}
 	v.clear();
@@ -54,10 +53,6 @@ GlutApp::~GlutApp()
 void GlutApp::glutKeyboard(unsigned char key, int x, int y)
 {
 	GlutApp::m_self->onKey(key, x, y);
-}
-void GlutApp::glutMouse(int button, int state, int x, int y)
-{
-	GlutApp::m_self->onMouse(button, state, x, y);	
 }
 void GlutApp::glutResize(int w, int h)
 {
@@ -154,12 +149,15 @@ void GlutApp::initWindow( int argc, char* argv[] )
 	glutIdleFunc(glutIdle);
     glutTimerFunc(0, glutTimer, 0);
 	glutKeyboardFunc(glutKeyboard);
-	glutMouseFunc(glutMouse);
     glutCloseFunc(glutCleanup);
 
 	if (m_bAutoFullscreen == 1) glutFullScreenToggle();
+
+	printf("[%s] %s\n", "glutapp", "Window intialised.");
+
 	// glViewport(0, 0, m_width, m_height);
-/*	glutMotionFunc(motionWrapper);
+/*	glutMouseFunc(mouseWrapper);
+	glutMotionFunc(motionWrapper);
 	glutPassiveMotionFunc(passiveMotionWrapper);
 	glutMouseWheelFunc(mouseWheelWrapper) ;
 
@@ -177,9 +175,6 @@ void GlutApp::onKey(unsigned char key, int x, int y)
     for (tbb::concurrent_vector<GLObject*>::iterator it = v.begin() ; it != v.end(); ++it)
 		(*it)->onKey(key, x, y);
 
-	GLfloat colors[][3] = {{0.0f, 0.0f, 1.0f}, {0.0f, 0.0f, 0.0f }};
-    static int back;
-
 	switch (key)
 	{
 		case 'W':
@@ -189,19 +184,8 @@ void GlutApp::onKey(unsigned char key, int x, int y)
 		case 'f': 
 		case 'F': glutFullScreenToggle(); break;
 		case 27 : glutDestroyWindow(windowHandle); break;
-		default: 
-			back ^= 1;
-		 	glClearColor(colors[back][0], colors[back][1], colors[back][2], 1.0f);
-		 	glutPostRedisplay();
-			break;
+		default: break;
 	}
-}
-void GlutApp::onMouse(int button, int state, int x, int y)
-{
-	if (button == GLUT_LEFT_BUTTON)
-    {
-    	
-    }	
 }
 void GlutApp::loadShader()
 {
@@ -312,12 +296,11 @@ void GlutApp::display(void)
 	// Call GLObj display here
 	for (tbb::concurrent_vector<GLObject*>::iterator it = v.begin(); it != v.end(); ++it)
 	{
-		// printf("-- %p\n", (*it));
-		if (!(*it)) continue;
+		// if (!(*it)) continue;
 		if (!(*it)->isVBOCreated())
 		{
 			(*it)->updateScreen(m_width, m_height);
-			if ((*it)->getProgramID() == 0) (*it)->setProgramID(programID);
+			(*it)->setProgramID(programID);
 			(*it)->createVBO();				
 		}
 		(*it)->setFPS(frameCount);
@@ -326,14 +309,11 @@ void GlutApp::display(void)
 	}
 
 	// Constant FPS
-	if (m_constantFPS)
-	{
-		previousTime = currentTime;
-		int timeInterval = currentTime - previousTime;
-		if (timeInterval < 30)
-			usleep(30*1000 - timeInterval);
-		currentTime = glutGet(GLUT_ELAPSED_TIME);
-	}
+	previousTime = currentTime;
+	int timeInterval = currentTime - previousTime;
+    if (timeInterval < 30)
+    	usleep(30*1000 - timeInterval);
+    currentTime = glutGet(GLUT_ELAPSED_TIME);
 
 	glutSwapBuffers();
 	glutPostRedisplay();
@@ -364,8 +344,8 @@ void GlutApp::timer(int value)
 }
 void GlutApp::cleanup(void) 
 {
-	for (tbb::concurrent_vector<GLObject*>::iterator it = v.begin(); it != v.end(); ++it)
-		(*it)->destroyVBO();
+	printf("%s\n", "GlutApp::cleanup");	
+	
 	glutLeaveMainLoop();
 	raise(SIGINT);
 }

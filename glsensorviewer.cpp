@@ -4,21 +4,15 @@ wezside::GLSensorViewer::~GLSensorViewer()
 {
 	printf("%s\n", "wezside::GLSensorViewer::~GLSensorViewer()");
 	delete[] m_streams;
-	delete[] m_pTexMap;
-/*	m_depthFrame.release();
-	m_colorFrame.release();
-	m_depthStream.stop();
-	m_depthStream.destroy();
-	m_colorStream.stop();
-	m_colorStream.destroy();
-	m_device.close();*/
-	openni::OpenNI::shutdown();	
+	free(m_pTexMap);
 }
 int wezside::GLSensorViewer::init()
 {
 	openni::VideoMode depthVideoMode;
 	openni::VideoMode colorVideoMode;
 
+	// printf("[%s] %s %s\n", "sensorviewer", "Depth Stream is valid", m_depthStream.isValid() == 1 ? "YES" : "NO");
+	// printf("[%s] %s %s\n", "sensorviewer", "Colour Stream is valid", m_colorStream.isValid() == 1 ? "YES" : "NO");
 	if (m_depthStream.isValid() && m_colorStream.isValid())
 	{
 		depthVideoMode = m_depthStream.getVideoMode();
@@ -32,27 +26,15 @@ int wezside::GLSensorViewer::init()
 		if (depthWidth == colorWidth &&
 			depthHeight == colorHeight)
 		{
-			m_width = depthWidth;
-			m_height = depthHeight;
+				m_width = depthWidth;
+				m_height = depthHeight;
 		}
-		else if (depthWidth > colorWidth &&
-				 depthHeight > colorHeight)
-		{
-			m_width = depthWidth;
-			m_height = depthHeight;
-		}
-		else if (depthWidth < colorWidth &&
-				 depthHeight < colorHeight)
-		{
-			m_width = colorWidth;
-			m_height = colorHeight;
-		}		
 		else
 		{
-			printf("Error - expect color and depth to be in same resolution: D: %dx%d, C: %dx%d\n",
-				depthWidth, depthHeight,
-				colorWidth, colorHeight);
-			return openni::STATUS_ERROR;
+				printf("Error - expect color and depth to be in same resolution: D: %dx%d, C: %dx%d\n",
+						depthWidth, depthHeight,
+						colorWidth, colorHeight);
+				return openni::STATUS_ERROR;
 		}
 	}
 	else if (m_depthStream.isValid())
@@ -80,39 +62,32 @@ int wezside::GLSensorViewer::init()
 	// Texture map init
 	m_nTexMapX = MIN_CHUNKS_SIZE(m_width, TEXTURE_SIZE);
 	m_nTexMapY = MIN_CHUNKS_SIZE(m_height, TEXTURE_SIZE);
-	printf("%dx%d\n", m_nTexMapX, m_nTexMapY);
 	m_pTexMap = new openni::RGB888Pixel[m_nTexMapX * m_nTexMapY];
+
+	printf("%s\n", "GLSensorViewer::init()");
 	return openni::STATUS_OK;
 }
 
 void wezside::GLSensorViewer::createVBO()
 {
-	std::cout << "GLSensorViewer::createVBO" << std::endl;
+	printf("[%s] %s [%d]\n", m_name.c_str(), "GLSensorViewer::createVBO", programID);	
 
-	// glEnable(GL_DEPTH_TEST);
-	// glDepthFunc(GL_LESS);
-	// glUtil.exitOnGLError("ERROR: Could not set OpenGL depth testing options");
+	glEnable(GL_DEPTH_TEST);
+	glDepthFunc(GL_LESS);
+	glUtil.exitOnGLError("ERROR: Could not set OpenGL depth testing options");
 	 
 	glEnable(GL_CULL_FACE);
 	glCullFace(GL_BACK);
 	glFrontFace(GL_CW);
 	glUtil.exitOnGLError("ERROR: Could not set OpenGL culling options");
 	
+	glUseProgram(programID);
 	texCoordLoc = glGetUniformLocation(programID, "in_TexCoord");	
 	samplerLoc = glGetUniformLocation(programID, "s_texture");	
 	modelMatrixUniformLocation = glGetUniformLocation(programID, "modelMatrix");
 	viewMatrixUniformLocation = glGetUniformLocation(programID, "viewMatrix");
 	projectionMatrixUniformLocation = glGetUniformLocation(programID, "projectionMatrix");	
 	
-	// For use with Perspective projection
-/* 	Vertex vertices[] =
-	{
-		{{ -0.8f,  0.8f, 0.0f, 1.0f }, { 1.0f, 0.0f, 0.0f, 1.0f }},
-		{{  0.8f,  0.8f, 0.0f, 1.0f }, { 0.0f, 1.0f, 0.0f, 1.0f }},
-		{{ -0.8f, -0.8f, 0.0f, 1.0f }, { 0.0f, 0.0f, 1.0f, 1.0f }},
-		{{  0.8f, -0.8f, 0.0f, 1.0f }, { 0.0f, 0.0f, 1.0f, 1.0f }}
-	};*/
-
 	// For use with Orthogonal projection
 	float wwww = (float)m_nTexMapX;
 	float hhhh = (float)m_nTexMapY;
@@ -129,7 +104,7 @@ void wezside::GLSensorViewer::createVBO()
 		{{ wwww, hhhh, 0.0f, 1.0f }, { 0.0f, 1.0f, 0.0f, 1.0f }, {  0.0f, 0.0f }},
 		{{ 0.0f, 0.0f, 0.0f, 1.0f }, { 0.0f, 0.0f, 1.0f, 1.0f }, {  3.0f, 3.0f }},
 		{{ wwww, 0.0f, 0.0f, 1.0f }, { 0.0f, 0.0f, 1.0f, 1.0f }, {  0.0f, 3.0f }}
-	};        
+	};
 
 	const size_t vertexSize = sizeof(vertices[0]);
 	const size_t rgbOffset = sizeof(vertices[0].XYZW);    
@@ -181,30 +156,32 @@ void wezside::GLSensorViewer::createVBO()
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
+	// Orthogonal Projeciton
+	projectionMatrix =
+		glUtil.createOrthogonalMatrix(
+			-1, 100.0, 0.0, (float)screenWidth, 0.0, (float)screenHeight
+	);
+
+	glUseProgram(programID);
 	glUniform1i(samplerLoc, 0);
+	glUniformMatrix4fv(projectionMatrixUniformLocation, 1, GL_FALSE, projectionMatrix.m);
+	glUseProgram(0);
+	m_isVBOCreated = 1;
+	printf("[%s] %s\n", m_name.c_str(), "GLSensorViewer::createVBO END");
 }
 
 void wezside::GLSensorViewer::resize(int w, int h)
 {
 	screenWidth = w;
 	screenHeight = h;
-	printf("GLObject::resize(%d,%d)\n", w, h);
+	printf("GLSensorViewer::resize(%d,%d)\n", w, h);
 
 	// Orthogonal Projeciton
 	projectionMatrix =
 		glUtil.createOrthogonalMatrix(
 		   -1, 100.0, 0.0, (float)w, 0.0, (float)h
 		);
-
-/*	projectionMatrix =
-		glUtil.createProjectionMatrix(
-			60,
-			(float)w / h,
-			1.0f,
-			100.0f
-		);
-	// Move the Eye(Cam) space backwards so we can see all
-	glUtil.translateMatrix(&viewMatrix, 0, 0, -2);*/
+	if (programID == 0) return;
 
 	glUseProgram(programID);
 	glUniformMatrix4fv(projectionMatrixUniformLocation, 1, GL_FALSE, projectionMatrix.m);
@@ -228,29 +205,87 @@ void wezside::GLSensorViewer::update()
 	switch (changedIndex)
 	{
 		case 0:
-			m_depthStream.readFrame(&m_depthFrame); break;		
+			m_depthStream.readFrame(&m_depthFrame); break;
 		case 1:
 			m_colorStream.readFrame(&m_colorFrame); break;
 		default:
 			printf("Error in wait\n");
-	}	
+	}
 
-	// Read depth frame
-	if (m_depthFrame.isValid()) depthReading = simpleRead(m_depthFrame);
-	if (m_colorFrame.isValid()) drawColorFrame(m_colorFrame);
-	if (m_depthFrame.isValid()) drawDepthFrame(m_depthFrame);
+	glClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	if (m_depthFrame.isValid())
+	{
+		calculateHistogram(m_pDepthHist, MAX_DEPTH, m_depthFrame);
+	}
+
+	memset(m_pTexMap, 0, m_nTexMapX*m_nTexMapY*sizeof(openni::RGB888Pixel));
+
+	// check if we need to draw image frame to texture
+	if ((m_eViewState == DISPLAY_MODE_OVERLAY ||
+			m_eViewState == DISPLAY_MODE_IMAGE) && m_colorFrame.isValid())
+	{
+		const openni::RGB888Pixel* pImageRow = (const openni::RGB888Pixel*)m_colorFrame.getData();
+		openni::RGB888Pixel* pTexRow = m_pTexMap + m_colorFrame.getCropOriginY() * m_nTexMapX;
+		int rowSize = m_colorFrame.getStrideInBytes() / sizeof(openni::RGB888Pixel);
+
+		for (int y = 0; y < m_colorFrame.getHeight(); ++y)
+		{
+			const openni::RGB888Pixel* pImage = pImageRow;
+			openni::RGB888Pixel* pTex = pTexRow + m_colorFrame.getCropOriginX();
+
+			for (int x = 0; x < m_colorFrame.getWidth(); ++x, ++pImage, ++pTex)
+			{
+					*pTex = *pImage;
+			}
+
+			pImageRow += rowSize;
+			pTexRow += m_nTexMapX;
+		}
+	}
+
+	// check if we need to draw depth frame to texture
+	if ((m_eViewState == DISPLAY_MODE_OVERLAY ||
+			m_eViewState == DISPLAY_MODE_DEPTH) && m_depthFrame.isValid())
+	{
+		const openni::DepthPixel* pDepthRow = (const openni::DepthPixel*)m_depthFrame.getData();
+		openni::RGB888Pixel* pTexRow = m_pTexMap + m_depthFrame.getCropOriginY() * m_nTexMapX;
+		int rowSize = m_depthFrame.getStrideInBytes() / sizeof(openni::DepthPixel);
+
+		for (int y = 0; y < m_depthFrame.getHeight(); ++y)
+		{
+			const openni::DepthPixel* pDepth = pDepthRow;
+			openni::RGB888Pixel* pTex = pTexRow + m_depthFrame.getCropOriginX();
+
+			for (int x = 0; x < m_depthFrame.getWidth(); ++x, ++pDepth, ++pTex)
+			{
+					if (*pDepth != 0)
+					{
+							int nHistValue = m_pDepthHist[*pDepth];
+							pTex->r = nHistValue;
+							pTex->g = nHistValue;
+							pTex->b = 0;
+					}
+			}
+
+			pDepthRow += rowSize;
+			pTexRow += m_nTexMapX;
+		}
+	}
 
 	// Draw OpenGL
-	angle += 1.0f;
-	angle = fmod(angle, 360.0);
+	// angle += 1.0f;
+	// angle = fmod(angle, 360.0);
 
-	viewMatrix = GLUtils::IDENTITY_MATRIX;
-	glUtil.rotateAboutY(&viewMatrix, glUtil.degreesToRadians(angle));
+	// viewMatrix = GLUtils::IDENTITY_MATRIX;
+	// glUtil.rotateAboutY(&viewMatrix, glUtil.degreesToRadians(angle));
 	// glUtil.rotateAboutX(&modelMatrix, glUtil.degreesToRadians(angle));
 }
 
 void wezside::GLSensorViewer::draw()
 {
+	if (programID == 0) return;
+
 	// Make the shader program active
 	glUseProgram(programID);
 	glUtil.exitOnGLError("ERROR: Could not use the shader program");	
@@ -291,12 +326,9 @@ void wezside::GLSensorViewer::draw()
  */
 void wezside::GLSensorViewer::drawColorFrame(openni::VideoFrameRef& frame)
 {
-	memset(m_pTexMap, 0, m_nTexMapX*m_nTexMapY*sizeof(openni::RGB888Pixel));
-
-	// check if we need to draw image frame to texture
-	if ((m_eViewState == DISPLAY_MODE_OVERLAY ||
-		 m_eViewState == DISPLAY_MODE_IMAGE) && frame.isValid())
+	if (m_eViewState == DISPLAY_MODE_IMAGE && frame.isValid())
 	{
+		
 		const openni::RGB888Pixel* pImageRow = (const openni::RGB888Pixel*)frame.getData();
 		openni::RGB888Pixel* pTexRow = m_pTexMap + frame.getCropOriginY() * m_nTexMapX;
 		int rowSize = frame.getStrideInBytes() / sizeof(openni::RGB888Pixel);
@@ -322,6 +354,8 @@ void wezside::GLSensorViewer::drawDepthFrame(openni::VideoFrameRef& frame)
 		calculateHistogram(m_pDepthHist, MAX_DEPTH, m_depthFrame);
 	}*/
 	if (m_eViewState != DISPLAY_MODE_DEPTH) return;
+
+	memset(m_pTexMap, 0, m_nTexMapX*m_nTexMapY*sizeof(openni::RGB888Pixel));
 	const openni::DepthPixel* pDepthRow = (const openni::DepthPixel*)m_depthFrame.getData();
 	openni::RGB888Pixel* pTexRow = m_pTexMap + m_depthFrame.getCropOriginY() * m_nTexMapX;
 	int rowSize = m_depthFrame.getStrideInBytes() / sizeof(openni::DepthPixel);
@@ -397,4 +431,19 @@ void wezside::GLSensorViewer::calculateHistogram(float* pHistogram, int histogra
 			pHistogram[nIndex] = (256 * (1.0f - (pHistogram[nIndex] / nNumberOfPoints)));
 		}
 	}
+}
+
+void wezside::GLSensorViewer::destroyVBO()
+{
+	printf("%s\n", "GLSensorViewer::destroyVBO()");
+	glDisableVertexAttribArray(0);
+	glDisableVertexAttribArray(1);
+	glDisableVertexAttribArray(2);
+
+	glBindVertexArray(0);
+	glUseProgram(0);
+	glBindTexture(GL_TEXTURE_2D, 0);
+
+	glActiveTexture(0);
+	glBindTexture(GL_TEXTURE_2D, 0);    
 }

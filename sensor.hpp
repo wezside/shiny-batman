@@ -24,7 +24,8 @@ namespace wezside
         
         openni::Status rc;
         openni::Device device;
-        openni::VideoStream depth, color;
+        openni::VideoStream depth;
+        openni::VideoStream color;
     };
 };
 

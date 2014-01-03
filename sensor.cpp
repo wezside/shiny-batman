@@ -4,11 +4,12 @@
 wezside::Sensor::~Sensor() 
 {
 	printf("%s\n", "wezside::Sensor::~Sensor()");
-	openni::OpenNI::shutdown();
+	
 }
 int wezside::Sensor::init(int argc, char** argv)
 {
 	openni::Status rc = openni::STATUS_OK;
+	const char* deviceURI = openni::ANY_DEVICE;
 	if (argc > 1)
 	{
 		deviceURI = argv[1];
@@ -20,8 +21,8 @@ int wezside::Sensor::init(int argc, char** argv)
 	rc = device.open(deviceURI);
 	if (rc != openni::STATUS_OK)
 	{
-		printf("Device open failed:\n%s\n", openni::OpenNI::getExtendedError());
-		openni::OpenNI::shutdown();	
+		printf("SimpleViewer: Device open failed:\n%s\n", openni::OpenNI::getExtendedError());
+		openni::OpenNI::shutdown();
 		return 1;
 	}
 
@@ -31,13 +32,13 @@ int wezside::Sensor::init(int argc, char** argv)
 		rc = depth.start();
 		if (rc != openni::STATUS_OK)
 		{
-			printf("Couldn't start depth stream:\n%s\n", openni::OpenNI::getExtendedError());
+			printf("SimpleViewer: Couldn't start depth stream:\n%s\n", openni::OpenNI::getExtendedError());
 			depth.destroy();
 		}
 	}
 	else
 	{
-		printf("Couldn't find depth stream:\n%s\n", openni::OpenNI::getExtendedError());
+		printf("SimpleViewer: Couldn't find depth stream:\n%s\n", openni::OpenNI::getExtendedError());
 	}
 
 	rc = color.create(device, openni::SENSOR_COLOR);
@@ -46,19 +47,19 @@ int wezside::Sensor::init(int argc, char** argv)
 		rc = color.start();
 		if (rc != openni::STATUS_OK)
 		{
-			printf("Couldn't start color stream:\n%s\n", openni::OpenNI::getExtendedError());
+			printf("SimpleViewer: Couldn't start color stream:\n%s\n", openni::OpenNI::getExtendedError());
 			color.destroy();
 		}
 	}
 	else
 	{
-		printf("Couldn't find color stream:\n%s\n", openni::OpenNI::getExtendedError());
+		printf("SimpleViewer: Couldn't find color stream:\n%s\n", openni::OpenNI::getExtendedError());
 	}
 
 	if (!depth.isValid() || !color.isValid())
 	{
-		printf("No valid streams. Exiting\n");
-		openni::OpenNI::shutdown();	
+		printf("SimpleViewer: No valid streams. Exiting\n");
+		openni::OpenNI::shutdown();
 		return 2;
 	}
 
@@ -66,7 +67,7 @@ int wezside::Sensor::init(int argc, char** argv)
 	// printAvailSensorInfo(device, openni::SENSOR_DEPTH);
 
 	// Set the video mode resolution to high
-	const openni::SensorInfo* sensorInfo = device.getSensorInfo(openni::SENSOR_COLOR);
+/*	const openni::SensorInfo* sensorInfo = device.getSensorInfo(openni::SENSOR_COLOR);
 	const openni::Array<openni::VideoMode>& videoModes = sensorInfo->getSupportedVideoModes();	
 	rc = color.setVideoMode(videoModes[4]);
 	if (rc != openni::STATUS_OK)
@@ -75,7 +76,6 @@ int wezside::Sensor::init(int argc, char** argv)
 		color.destroy();
 	}	
 
-	// Set depth video mode
 	const openni::SensorInfo* sensorInfoDepth = device.getSensorInfo(openni::SENSOR_DEPTH);
 	const openni::Array<openni::VideoMode>& videoModesDepth = sensorInfoDepth->getSupportedVideoModes();	
 	rc = depth.setVideoMode(videoModesDepth[4]);	
@@ -83,11 +83,12 @@ int wezside::Sensor::init(int argc, char** argv)
 	{
 		printf("Couldn't set depth video stream mode:\n%s\n", openni::OpenNI::getExtendedError());
 		depth.destroy();
-	}		
-
-	// Current sensor info
+	}*/		
 	printSensorInfo(color);
 	printSensorInfo(depth);
+
+	// printf("[%s] %s %s\n", "sensor", "Depth Stream is valid", depth.isValid() == 1 ? "YES" : "NO");
+	// printf("[%s] %s %s\n", "sensor", "Colour Stream is valid", color.isValid() == 1 ? "YES" : "NO");
 
 	if (rc != openni::STATUS_OK) printf("%s\n", openni::OpenNI::getExtendedError());
 	return rc;
@@ -115,14 +116,14 @@ std::string wezside::Sensor::getPixelFormatString(int format)
 void wezside::Sensor::printSensorInfo(openni::VideoStream& vs)
 {
 	openni::VideoMode currentVM = vs.getVideoMode();
-	printf("%s\n", "\n=================\nCurrent VideoMode\n=================");
+	printf("%s\n", "\n=================\nVideoMode\n=================");
 	printf("FPS %d\n", currentVM.getFps());
 	printf("PixelFormat (%d) %s\n", currentVM.getPixelFormat(),
-								  	getPixelFormatString(
-								  		currentVM.getPixelFormat()).c_str()
-								  	);
+									getPixelFormatString(
+										currentVM.getPixelFormat()).c_str()
+									);
 	printf("Resolution X: %d\n", currentVM.getResolutionX());
-	printf("Resolution y: %d\n\n", currentVM.getResolutionY());		
+	printf("Resolution y: %d\n", currentVM.getResolutionY());		
 }
 
 void wezside::Sensor::printAvailSensorInfo(openni::Device& device, openni::SensorType st)
@@ -135,9 +136,9 @@ void wezside::Sensor::printAvailSensorInfo(openni::Device& device, openni::Senso
 		const openni::VideoMode vm(videoModes[i]);
 		printf("FPS %d :: ", vm.getFps());
 		printf("PixelFormat (%d) %s\n", vm.getPixelFormat(),
-									  	getPixelFormatString(
-									  		vm.getPixelFormat()).c_str()
-									  	);
+										getPixelFormatString(
+										vm.getPixelFormat()).c_str()
+										);
 		printf("Resolution X (%d) :: ", vm.getResolutionX());
 		printf("Resolution y (%d)\n\n", vm.getResolutionY());
 	}	

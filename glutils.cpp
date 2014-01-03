@@ -155,9 +155,9 @@ int wezside::GLUtils::exitOnGLError(const char* error_message)
 
 		fprintf(stderr, display_message, gluErrorString(ErrorValue));
 
-		free(display_message);
-		exit(EXIT_FAILURE);
-		// return EXIT_FAILURE;
+		// free(display_message);
+		// exit(EXIT_FAILURE);
+		return EXIT_FAILURE;
 	}
 	return EXIT_SUCCESS;
 }
